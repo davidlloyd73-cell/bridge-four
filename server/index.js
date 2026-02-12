@@ -2,12 +2,26 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { createGame, addPlayer, removePlayer, allSeated, startDeal, processBid, playCard, getClientState, PHASES } from './game/game.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
+});
+
+// In production, serve the built React app
+const distPath = join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+app.use((req, res, next) => {
+  // Don't intercept socket.io or API requests
+  if (req.url.startsWith('/socket.io')) return next();
+  res.sendFile(join(distPath, 'index.html'));
 });
 
 // In-memory game storage
