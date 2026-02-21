@@ -197,7 +197,7 @@ body {
 .player-position { position: absolute; z-index: 5; }
 
 .pos-bottom {
-  bottom: 160px;
+  bottom: 175px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -482,8 +482,8 @@ body {
 
 /* ========== Cards ========== */
 .card {
-  width: 85px;
-  height: 120px;
+  width: 100px;
+  height: 140px;
   background: var(--card-white);
   border-radius: 8px;
   position: relative;
@@ -493,8 +493,8 @@ body {
 }
 
 .card.small {
-  width: 70px;
-  height: 100px;
+  width: 75px;
+  height: 105px;
 }
 
 .card.red { color: #c0392b; }
@@ -529,22 +529,22 @@ body {
   align-items: center;
   line-height: 1;
 }
-.top-left { top: 4px; left: 5px; }
-.bottom-right { bottom: 4px; right: 5px; transform: rotate(180deg); }
+.top-left { top: 5px; left: 6px; }
+.bottom-right { bottom: 5px; right: 6px; transform: rotate(180deg); }
 
-.card-rank { font-size: 1rem; font-weight: bold; }
-.card-suit { font-size: 0.8rem; }
+.card-rank { font-size: 1.15rem; font-weight: bold; }
+.card-suit { font-size: 0.95rem; }
 .card-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
-.card-suit-large { font-size: 2rem; }
+.card-suit-large { font-size: 2.4rem; }
 
-.card.small .card-rank { font-size: 0.85rem; }
-.card.small .card-suit { font-size: 0.7rem; }
-.card.small .card-suit-large { font-size: 1.6rem; }
+.card.small .card-rank { font-size: 0.95rem; }
+.card.small .card-suit { font-size: 0.8rem; }
+.card.small .card-suit-large { font-size: 1.8rem; }
 
 /* ========== Hand Layout ========== */
 .hand {
@@ -580,14 +580,14 @@ body {
 .hand-bottom .hand-cards { gap: 0; }
 
 .hand-bottom .hand-cards .card {
-  margin-left: -18px;
+  margin-left: -25px;
 }
 .hand-bottom .hand-cards .card:first-child { margin-left: 0; }
 
 .hand-top .hand-cards .card,
 .hand-left .hand-cards .card,
 .hand-right .hand-cards .card {
-  margin-left: -30px;
+  margin-left: -35px;
 }
 .hand-top .hand-cards .card:first-child,
 .hand-left .hand-cards .card:first-child,
@@ -600,7 +600,7 @@ body {
 .hand-left .hand-cards .card,
 .hand-right .hand-cards .card {
   margin-left: 0;
-  margin-top: -60px;
+  margin-top: -65px;
 }
 .hand-left .hand-cards .card:first-child,
 .hand-right .hand-cards .card:first-child { margin-top: 0; }
@@ -608,15 +608,74 @@ body {
 .dummy-label {
   text-align: center;
   color: var(--gold);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  background: rgba(0,0,0,0.5);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .dummy-hand .card.playable {
   border-color: #2ecc71;
   box-shadow: 0 0 8px rgba(46,204,113,0.5);
+}
+
+/* ========== Play Status Indicator ========== */
+.play-status {
+  text-align: center;
+  pointer-events: none;
+}
+
+.status-your-turn {
+  background: rgba(46, 204, 113, 0.25);
+  border: 2px solid #2ecc71;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  color: #2ecc71;
+  font-size: 1.1rem;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+.status-dummy {
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  color: var(--gold);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.status-sub {
+  font-size: 0.8rem;
+  color: #aaa;
+  font-weight: normal;
+}
+
+.status-icon {
+  font-size: 1.4rem;
+}
+
+.status-waiting {
+  color: #aaa;
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(46,204,113,0.3); }
+  50% { box-shadow: 0 0 20px rgba(46,204,113,0.6); }
 }
 
 /* ========== Hand Complete / Round Complete ========== */
@@ -732,17 +791,17 @@ body {
 
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
-  .card { width: 60px; height: 85px; }
-  .card.small { width: 50px; height: 72px; }
-  .card-rank { font-size: 0.8rem; }
-  .card-suit { font-size: 0.65rem; }
-  .card-suit-large { font-size: 1.4rem; }
+  .card { width: 70px; height: 100px; }
+  .card.small { width: 55px; height: 78px; }
+  .card-rank { font-size: 0.9rem; }
+  .card-suit { font-size: 0.75rem; }
+  .card-suit-large { font-size: 1.6rem; }
 
   .bid-btn { width: 42px; height: 28px; font-size: 0.7rem; }
   .center-area { width: 95vw; }
-  .pos-bottom { bottom: 115px; }
+  .pos-bottom { bottom: 130px; }
 
-  .hand-bottom .hand-cards .card { margin-left: -16px; }
+  .hand-bottom .hand-cards .card { margin-left: -20px; }
 
   .trick-pos-bottom { bottom: 18%; }
   .trick-pos-top { top: 12%; }
@@ -751,12 +810,12 @@ body {
 }
 
 @media (max-width: 480px) {
-  .card { width: 50px; height: 72px; }
-  .card.small { width: 42px; height: 60px; }
-  .card-rank { font-size: 0.7rem; }
-  .card-suit { font-size: 0.55rem; }
-  .card-suit-large { font-size: 1.2rem; }
+  .card { width: 58px; height: 82px; }
+  .card.small { width: 46px; height: 65px; }
+  .card-rank { font-size: 0.8rem; }
+  .card-suit { font-size: 0.6rem; }
+  .card-suit-large { font-size: 1.3rem; }
 
-  .pos-bottom { bottom: 100px; }
-  .hand-bottom .hand-cards .card { margin-left: -14px; }
+  .pos-bottom { bottom: 110px; }
+  .hand-bottom .hand-cards .card { margin-left: -16px; }
 }

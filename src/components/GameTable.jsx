@@ -146,7 +146,32 @@ export default function GameTable({
             </div>
           )}
 
-          {/* Playing phase - contract/trick info shown in overlay */}
+          {/* Playing phase - turn/status indicator */}
+          {phase === 'playing' && (
+            <div className="play-status">
+              {gameState.contract?.dummy === mySeat ? (
+                <div className="status-dummy">
+                  <span className="status-icon">&#128065;</span>
+                  <span>You are the Dummy</span>
+                  <span className="status-sub">{players[gameState.contract.declarer]?.name} (Declarer) plays your cards</span>
+                </div>
+              ) : gameState.currentTurn === mySeat ? (
+                <div className="status-your-turn">
+                  <span className="status-icon">&#9654;</span>
+                  <span>Your turn to play</span>
+                </div>
+              ) : gameState.declarerControlsDummy && gameState.contract?.declarer === mySeat ? (
+                <div className="status-your-turn">
+                  <span className="status-icon">&#9654;</span>
+                  <span>Play a card from Dummy's hand</span>
+                </div>
+              ) : (
+                <div className="status-waiting">
+                  Waiting for {players[gameState.currentTurn]?.name || gameState.currentTurn}...
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Hand complete */}
           {phase === 'hand_complete' && (
@@ -185,8 +210,8 @@ export default function GameTable({
           />
         )}
 
-        {/* My hand (bottom) */}
-        {gameState.myHand && gameState.myHand.length > 0 && (
+        {/* My hand (bottom) - hide when I am the dummy (shown via dummy hand instead) */}
+        {gameState.myHand && gameState.myHand.length > 0 && gameState.dummySeat !== mySeat && (
           <Hand
             cards={gameState.myHand}
             onPlayCard={onPlayCard}
@@ -196,8 +221,8 @@ export default function GameTable({
           />
         )}
 
-        {/* Dummy hand (shown when revealed) */}
-        {gameState.dummyHand && gameState.dummySeat && gameState.dummySeat !== mySeat && (
+        {/* Dummy hand (shown when revealed - visible to all players) */}
+        {gameState.dummyHand && gameState.dummySeat && (
           <Hand
             cards={gameState.dummyHand}
             onPlayCard={
@@ -209,7 +234,7 @@ export default function GameTable({
               gameState.contract?.declarer === mySeat && gameState.declarerControlsDummy
             }
             playableCards={dummyPlayableCards}
-            position={getSeatPosition(gameState.dummySeat, mySeat)}
+            position={gameState.dummySeat === mySeat ? 'bottom' : getSeatPosition(gameState.dummySeat, mySeat)}
             isDummy
           />
         )}
