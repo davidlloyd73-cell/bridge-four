@@ -21,6 +21,18 @@ export default function GameTable({
     );
   }
 
+  // Debug: validate gameState has expected shape
+  if (typeof gameState !== 'object' || !gameState.phase || !gameState.players) {
+    return (
+      <div className="app game-screen">
+        <div className="loading" style={{ fontSize: '0.8rem', maxWidth: '90vw', wordBreak: 'break-all' }}>
+          <p>Unexpected game state:</p>
+          <pre>{JSON.stringify(gameState, null, 2)}</pre>
+        </div>
+      </div>
+    );
+  }
+
   const { phase, players, vulnerability, dealer, dealNumber } = gameState;
   const seatPositions = getSeatPositions(mySeat);
   const positions = ['bottom', 'right', 'top', 'left'];

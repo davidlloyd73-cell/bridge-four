@@ -6,17 +6,30 @@ import GameTable from './components/GameTable';
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
+  componentDidCatch(error, errorInfo) {
+    this.setState({ errorInfo });
+  }
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ background: '#8B0000', color: '#fff', padding: '2rem', height: '100vh' }}>
+        <div style={{ background: '#8B0000', color: '#fff', padding: '2rem', height: '100vh', overflow: 'auto' }}>
           <h1>Something went wrong</h1>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{this.state.error?.message}</pre>
+          <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem' }}>
+            {this.state.error?.message}
+          </pre>
+          <h3 style={{ marginTop: '1rem' }}>Stack:</h3>
+          <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.7rem', color: '#faa' }}>
+            {this.state.error?.stack}
+          </pre>
+          <h3 style={{ marginTop: '1rem' }}>Component Stack:</h3>
+          <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.7rem', color: '#faa' }}>
+            {this.state.errorInfo?.componentStack}
+          </pre>
           <button onClick={() => window.location.reload()} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
             Reload
           </button>
