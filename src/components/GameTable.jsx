@@ -13,6 +13,30 @@ export default function GameTable({
 }) {
   const [showScores, setShowScores] = useState(false);
 
+  const phase = gameState?.phase;
+
+  // Hooks must always be called in the same order (Rules of Hooks)
+  // so these must come BEFORE any early returns
+  const playableCards = useMemo(() => {
+    if (phase !== 'playing') return [];
+    if (!gameState?.myHand) return [];
+
+    const isMyDirectTurn = gameState.currentTurn === mySeat;
+
+    if (isMyDirectTurn) {
+      return getPlayableFromHand(gameState.myHand, gameState.currentTrick);
+    }
+    return [];
+  }, [gameState, mySeat, phase]);
+
+  const dummyPlayableCards = useMemo(() => {
+    if (phase !== 'playing') return [];
+    if (!gameState?.declarerControlsDummy) return [];
+    if (gameState.contract?.declarer !== mySeat) return [];
+    if (!gameState.dummyHand) return [];
+    return getPlayableFromHand(gameState.dummyHand, gameState.currentTrick);
+  }, [gameState, mySeat, phase]);
+
   if (!gameState) {
     return (
       <div className="app game-screen">
@@ -21,45 +45,9 @@ export default function GameTable({
     );
   }
 
-  // Debug: validate gameState has expected shape
-  if (typeof gameState !== 'object' || !gameState.phase || !gameState.players) {
-    return (
-      <div className="app game-screen">
-        <div className="loading" style={{ fontSize: '0.8rem', maxWidth: '90vw', wordBreak: 'break-all' }}>
-          <p>Unexpected game state:</p>
-          <pre>{JSON.stringify(gameState, null, 2)}</pre>
-        </div>
-      </div>
-    );
-  }
-
-  const { phase, players, vulnerability, dealer, dealNumber } = gameState;
-  const seatPositions = getSeatPositions(mySeat);
+  const { players, vulnerability, dealer, dealNumber } = gameState;
   const positions = ['bottom', 'right', 'top', 'left'];
   const seatsInOrder = [mySeat, ...getOtherSeats(mySeat)];
-
-  // Determine playable cards
-  const playableCards = useMemo(() => {
-    if (phase !== 'playing') return [];
-    if (!gameState.myHand) return [];
-
-    const isMyDirectTurn = gameState.currentTurn === mySeat;
-    const isControllingDummy = gameState.declarerControlsDummy && gameState.contract?.declarer === mySeat;
-
-    if (isMyDirectTurn) {
-      return getPlayableFromHand(gameState.myHand, gameState.currentTrick);
-    }
-    return [];
-  }, [gameState, mySeat, phase]);
-
-  // Dummy playable cards (when declarer controls dummy)
-  const dummyPlayableCards = useMemo(() => {
-    if (phase !== 'playing') return [];
-    if (!gameState.declarerControlsDummy) return [];
-    if (gameState.contract?.declarer !== mySeat) return [];
-    if (!gameState.dummyHand) return [];
-    return getPlayableFromHand(gameState.dummyHand, gameState.currentTrick);
-  }, [gameState, mySeat, phase]);
 
   return (
     <div className="app game-screen">
