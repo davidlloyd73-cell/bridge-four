@@ -3,6 +3,30 @@ import { socket } from './socket';
 import Lobby from './components/Lobby';
 import GameTable from './components/GameTable';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ background: '#8B0000', color: '#fff', padding: '2rem', height: '100vh' }}>
+          <h1>Something went wrong</h1>
+          <pre style={{ whiteSpace: 'pre-wrap' }}>{this.state.error?.message}</pre>
+          <button onClick={() => window.location.reload()} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
+            Reload
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   const [connected, setConnected] = useState(false);
   const [inGame, setInGame] = useState(false);
@@ -85,16 +109,18 @@ export default function App() {
   }
 
   return (
-    <GameTable
-      gameState={gameState}
-      mySeat={mySeat}
-      myName={myName}
-      onStartGame={startGame}
-      onBid={makeBid}
-      onPlayCard={playCardAction}
-      onNextDeal={nextDeal}
-      onNewRound={newRound}
-      error={error}
-    />
+    <ErrorBoundary>
+      <GameTable
+        gameState={gameState}
+        mySeat={mySeat}
+        myName={myName}
+        onStartGame={startGame}
+        onBid={makeBid}
+        onPlayCard={playCardAction}
+        onNextDeal={nextDeal}
+        onNewRound={newRound}
+        error={error}
+      />
+    </ErrorBoundary>
   );
 }

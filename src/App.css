@@ -5,8 +5,8 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --felt-green: #1a6b3c;
-  --felt-dark: #145530;
+  --felt-green: #237a48;
+  --felt-dark: #1a6035;
   --felt-border: #0d3d22;
   --card-white: #f5f0e8;
   --card-shadow: rgba(0,0,0,0.3);
@@ -263,7 +263,13 @@ body {
 }
 
 /* Waiting Area */
-.waiting-area { text-align: center; }
+.waiting-area {
+  text-align: center;
+  background: rgba(0,0,0,0.6);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--gold);
+}
 .waiting-area h2 { color: var(--gold); margin-bottom: 1rem; }
 .seated-list {
   display: grid;
