@@ -146,16 +146,7 @@ export default function GameTable({
             </div>
           )}
 
-          {/* Playing phase */}
-          {phase === 'playing' && (
-            <TrickArea
-              currentTrick={gameState.currentTrick}
-              mySeat={mySeat}
-              contract={gameState.contract}
-              tricksWon={gameState.tricksWon}
-              trickNumber={gameState.trickNumber}
-            />
-          )}
+          {/* Playing phase - contract/trick info shown in overlay */}
 
           {/* Hand complete */}
           {phase === 'hand_complete' && (
@@ -181,6 +172,18 @@ export default function GameTable({
             </div>
           )}
         </div>
+
+        {/* Trick area overlay - positioned across the whole table */}
+        {phase === 'playing' && (
+          <TrickArea
+            currentTrick={gameState.currentTrick}
+            lastCompletedTrick={gameState.lastCompletedTrick}
+            mySeat={mySeat}
+            contract={gameState.contract}
+            tricksWon={gameState.tricksWon}
+            trickNumber={gameState.trickNumber}
+          />
+        )}
 
         {/* My hand (bottom) */}
         {gameState.myHand && gameState.myHand.length > 0 && (

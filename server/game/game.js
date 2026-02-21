@@ -33,6 +33,7 @@ export function createGame(gameCode) {
     scores: [],          // [{ dealNumber, contract, tricksMade, score: {NS, EW}, vulnerability, dealer }]
     totalScores: { NS: 0, EW: 0 },
     currentTurn: null,
+    lastCompletedTrick: null,
   };
 }
 
@@ -80,6 +81,7 @@ export function startDeal(game) {
   game.dummyRevealed = false;
   game.phase = PHASES.BIDDING;
   game.currentTurn = game.dealer;
+  game.lastCompletedTrick = null;
 }
 
 export function processBid(game, seat, bid) {
@@ -181,6 +183,7 @@ export function playCard(game, seat, card) {
       trickNumber: game.trickNumber,
     };
 
+    game.lastCompletedTrick = completedTrick;
     game.currentTrick = [];
     game.trickNumber++;
 
@@ -320,6 +323,9 @@ export function getClientState(game, forSeat) {
     state.currentTrick = game.currentTrick;
     state.tricksWon = game.tricksWon;
     state.trickNumber = game.trickNumber;
+    if (game.lastCompletedTrick) {
+      state.lastCompletedTrick = game.lastCompletedTrick;
+    }
 
     // If it's dummy's turn, declarer controls
     if (game.currentTurn === game.contract?.dummy) {

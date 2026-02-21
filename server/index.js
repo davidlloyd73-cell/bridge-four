@@ -81,7 +81,17 @@ function scheduleBotAction(game) {
     const player = game.players[actingSeat];
 
     if (player?.isBot) {
+      // Extra delay after a completed trick so players can see all 4 cards
+      const trickJustCompleted = game.currentTrick.length === 0 && game.lastCompletedTrick;
+      const delay = trickJustCompleted ? BOT_DELAY + 1500 : BOT_DELAY;
+
       setTimeout(() => {
+        // Clear lastCompletedTrick before next play so client knows to hide it
+        if (game.lastCompletedTrick && game.currentTrick.length === 0) {
+          game.lastCompletedTrick = null;
+          broadcastGameState(game);
+        }
+
         const card = chooseCard(game, actingSeat);
         if (!card) return;
         const result = playCard(game, actingSeat, card);
@@ -95,13 +105,11 @@ function scheduleBotAction(game) {
         if (result.handComplete) {
           const lastScore = game.scores[game.scores.length - 1];
           console.log(`Hand complete - NS: ${lastScore.score.NS}, EW: ${lastScore.score.EW}`);
-          // Auto-advance to next deal after a pause
           scheduleBotAdvance(game);
         } else {
-          // Continue if next player is also a bot
           scheduleBotAction(game);
         }
-      }, BOT_DELAY);
+      }, delay);
     }
   }
 }
