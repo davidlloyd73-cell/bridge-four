@@ -285,6 +285,13 @@ body {
 }
 .seat-status.filled { color: #8f8; }
 
+.waiting-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .start-btn, .next-btn {
   padding: 0.7rem 2rem;
   border: none;

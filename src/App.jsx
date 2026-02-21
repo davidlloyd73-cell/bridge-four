@@ -106,6 +106,12 @@ export default function App() {
     });
   }, []);
 
+  const addBots = useCallback(() => {
+    socket.emit('add-bots', null, (response) => {
+      if (response?.error) setError(response.error);
+    });
+  }, []);
+
   if (!connected) {
     return (
       <div className="app connecting">
@@ -132,6 +138,7 @@ export default function App() {
         onPlayCard={playCardAction}
         onNextDeal={nextDeal}
         onNewRound={newRound}
+        onAddBots={addBots}
         error={error}
       />
     </ErrorBoundary>

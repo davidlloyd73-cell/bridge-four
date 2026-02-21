@@ -9,7 +9,7 @@ const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
 const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣', NT: 'NT' };
 
 export default function GameTable({
-  gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, error
+  gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, error
 }) {
   const [showScores, setShowScores] = useState(false);
 
@@ -128,9 +128,14 @@ export default function GameTable({
                   </div>
                 ))}
               </div>
-              {Object.values(players).filter(p => p?.seated).length === 4 && (
-                <button className="start-btn" onClick={onStartGame}>Deal First Hand</button>
-              )}
+              <div className="waiting-actions">
+                {Object.values(players).filter(p => p?.seated).length < 4 && (
+                  <button className="start-btn" onClick={onAddBots}>Fill with Bots</button>
+                )}
+                {Object.values(players).filter(p => p?.seated).length === 4 && (
+                  <button className="start-btn" onClick={onStartGame}>Deal First Hand</button>
+                )}
+              </div>
             </div>
           )}
 
