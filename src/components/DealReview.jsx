@@ -4,7 +4,8 @@ import { BiddingHistory } from './BiddingBox';
 
 const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
 const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣', NT: 'NT' };
-const SUIT_ORDER = ['S', 'H', 'D', 'C'];
+// Alternating black/red for readability: S(black), H(red), C(black), D(red)
+const SUIT_ORDER = ['S', 'H', 'C', 'D'];
 
 function groupBySuit(cards) {
   const groups = {};
@@ -53,6 +54,8 @@ export default function DealReview({
   lastScore,
   isRoundComplete,
   totalScores,
+  individualScores,
+  players,
   onNextDeal,
   onNewRound,
   onAnalyse,
@@ -143,13 +146,25 @@ export default function DealReview({
           )}
         </div>
 
-        {/* Round totals if round complete */}
-        {isRoundComplete && totalScores && (
-          <div className="review-round-totals">
-            <h3>Round Totals</h3>
-            <div className="review-totals-row">
-              <span>NS: {totalScores.NS}</span>
-              <span>EW: {totalScores.EW}</span>
+        {/* Individual standings */}
+        {individualScores && (
+          <div className="review-standings">
+            <h3>{isRoundComplete ? 'Round Standings' : 'Standings'}</h3>
+            <div className="review-standings-list">
+              {['N', 'E', 'S', 'W']
+                .map(seat => ({
+                  seat,
+                  name: players?.[seat]?.name || SEAT_NAMES[seat],
+                  score: individualScores[seat] || 0,
+                }))
+                .sort((a, b) => b.score - a.score)
+                .map((p, idx) => (
+                  <div key={p.seat} className={`review-standing-row ${idx === 0 ? 'leader' : ''}`}>
+                    <span className="standing-rank">{idx + 1}.</span>
+                    <span className="standing-name">{p.name} ({p.seat})</span>
+                    <span className="standing-score">{p.score}</span>
+                  </div>
+                ))}
             </div>
           </div>
         )}

@@ -32,6 +32,7 @@ export function createGame(gameCode) {
     dummyRevealed: false,
     scores: [],          // [{ dealNumber, contract, tricksMade, score: {NS, EW}, vulnerability, dealer }]
     totalScores: { NS: 0, EW: 0 },
+    individualScores: { N: 0, E: 0, S: 0, W: 0 },
     currentTurn: null,
     lastCompletedTrick: null,
   };
@@ -277,6 +278,13 @@ function completeHand(game) {
 
   game.totalScores.NS += score.NS;
   game.totalScores.EW += score.EW;
+
+  // Individual scoring: each player gets their team's score for the deal
+  game.individualScores.N += score.NS;
+  game.individualScores.S += score.NS;
+  game.individualScores.E += score.EW;
+  game.individualScores.W += score.EW;
+
   game.dealNumber++;
 
   // Check if chukker (4 deals) is complete
@@ -298,6 +306,7 @@ export function getClientState(game, forSeat) {
     currentTurn: game.currentTurn,
     scores: game.scores,
     totalScores: game.totalScores,
+    individualScores: game.individualScores,
   };
 
   // Player info

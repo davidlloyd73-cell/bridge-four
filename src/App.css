@@ -615,7 +615,7 @@ body {
   transform: translateX(-50%);
 }
 .hand-top {
-  top: 50px;
+  top: 70px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -641,26 +641,44 @@ body {
 }
 .hand-bottom .hand-cards .card:first-child { margin-left: 0; }
 
-.hand-top .hand-cards .card,
-.hand-left .hand-cards .card,
-.hand-right .hand-cards .card {
+.hand-top .hand-cards .card.small,
+.hand-left .hand-cards .card.small,
+.hand-right .hand-cards .card.small {
   margin-left: -35px;
 }
-.hand-top .hand-cards .card:first-child,
-.hand-left .hand-cards .card:first-child,
-.hand-right .hand-cards .card:first-child { margin-left: 0; }
+.hand-top .hand-cards .card.small:first-child,
+.hand-left .hand-cards .card.small:first-child,
+.hand-right .hand-cards .card.small:first-child { margin-left: 0; }
+
+/* Full-size cards at non-bottom positions (e.g. dummy) */
+.hand-top .hand-cards .card:not(.small),
+.hand-left .hand-cards .card:not(.small),
+.hand-right .hand-cards .card:not(.small) {
+  margin-left: -50px;
+}
+.hand-top .hand-cards .card:not(.small):first-child,
+.hand-left .hand-cards .card:not(.small):first-child,
+.hand-right .hand-cards .card:not(.small):first-child { margin-left: 0; }
 
 .hand-left .hand-cards,
 .hand-right .hand-cards {
   flex-direction: column;
 }
-.hand-left .hand-cards .card,
-.hand-right .hand-cards .card {
+.hand-left .hand-cards .card.small,
+.hand-right .hand-cards .card.small {
   margin-left: 0;
   margin-top: -65px;
 }
-.hand-left .hand-cards .card:first-child,
-.hand-right .hand-cards .card:first-child { margin-top: 0; }
+.hand-left .hand-cards .card.small:first-child,
+.hand-right .hand-cards .card.small:first-child { margin-top: 0; }
+
+.hand-left .hand-cards .card:not(.small),
+.hand-right .hand-cards .card:not(.small) {
+  margin-left: 0;
+  margin-top: -90px;
+}
+.hand-left .hand-cards .card:not(.small):first-child,
+.hand-right .hand-cards .card:not(.small):first-child { margin-top: 0; }
 
 .dummy-label {
   text-align: center;
@@ -718,6 +736,26 @@ body {
   font-size: 0.95rem;
   color: #aaa;
   font-weight: normal;
+}
+
+.dummy-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  font-size: 0.9rem;
+  color: #ccc;
+}
+.dummy-tricks-display {
+  font-weight: bold;
+  color: #fff;
+  font-size: 1rem;
+}
+.dummy-target {
+  font-size: 0.85rem;
+  color: var(--gold);
 }
 
 .status-icon {
@@ -825,6 +863,59 @@ body {
   padding-top: 0.6rem;
 }
 .total-score { color: var(--gold); font-size: 1.1rem; }
+
+/* Individual scores in ScoreSheet */
+.individual-scores {
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--gold);
+}
+.individual-scores h3 {
+  color: var(--gold);
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+.individual-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.individual-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.individual-row.leader {
+  background: rgba(212,168,67,0.15);
+  border: 1px solid rgba(212,168,67,0.4);
+}
+.individual-rank {
+  color: #888;
+  font-weight: bold;
+  width: 1.5rem;
+}
+.individual-row.leader .individual-rank { color: var(--gold); }
+.individual-name {
+  flex: 1;
+  font-weight: bold;
+  color: #fff;
+}
+.individual-seat {
+  color: #888;
+  font-size: 0.85rem;
+}
+.individual-score {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--gold);
+  min-width: 50px;
+  text-align: right;
+}
 
 /* ========== Error Toast ========== */
 .error-toast {
@@ -1023,22 +1114,49 @@ body {
   font-size: 1rem;
 }
 
-/* Round totals */
-.review-round-totals {
-  text-align: center;
+/* Standings in review */
+.review-standings {
   margin: 1rem 0;
   padding: 0.8rem;
   background: rgba(255,255,255,0.05);
   border-radius: 10px;
 }
-.review-round-totals h3 { color: #ccc; margin-bottom: 0.5rem; }
-.review-totals-row {
+.review-standings h3 {
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+.review-standings-list {
   display: flex;
-  justify-content: center;
-  gap: 2rem;
-  font-size: 1.3rem;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.review-standing-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+}
+.review-standing-row.leader {
+  background: rgba(212,168,67,0.15);
+}
+.standing-rank {
+  color: #888;
+  font-weight: bold;
+  width: 1.5rem;
+}
+.review-standing-row.leader .standing-rank { color: var(--gold); }
+.standing-name {
+  flex: 1;
+  color: #ccc;
+  font-size: 0.95rem;
+}
+.standing-score {
   font-weight: bold;
   color: var(--gold);
+  font-size: 1.05rem;
 }
 
 /* Action buttons */

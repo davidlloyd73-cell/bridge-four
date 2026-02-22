@@ -155,7 +155,22 @@ export default function GameTable({
                 <div className="status-dummy">
                   <span className="status-icon">&#128065;</span>
                   <span>You are the Dummy</span>
-                  <span className="status-sub">{players[gameState.contract.declarer]?.name} (Declarer) plays your cards</span>
+                  <span className="status-sub">
+                    {players[gameState.contract.declarer]?.name} (Declarer) plays your cards
+                  </span>
+                  {gameState.tricksWon && (
+                    <div className="dummy-progress">
+                      <span>Trick {gameState.trickNumber || 1} of 13</span>
+                      <span className="dummy-tricks-display">
+                        {getTeam(gameState.contract.declarer) === 'NS' ? 'Us' : 'Them'}: {gameState.tricksWon[getTeam(gameState.contract.declarer)]}
+                        {' / '}
+                        {getTeam(gameState.contract.declarer) === 'NS' ? 'Them' : 'Us'}: {gameState.tricksWon[getTeam(gameState.contract.declarer) === 'NS' ? 'EW' : 'NS']}
+                      </span>
+                      <span className="dummy-target">
+                        Need {6 + gameState.contract.level} tricks for contract
+                      </span>
+                    </div>
+                  )}
                 </div>
               ) : gameState.currentTurn === mySeat ? (
                 <div className="status-your-turn">
@@ -234,6 +249,8 @@ export default function GameTable({
         <ScoreSheet
           scores={gameState.scores}
           totalScores={gameState.totalScores}
+          individualScores={gameState.individualScores}
+          players={gameState.players}
           onClose={() => setShowScores(false)}
         />
       )}
@@ -248,6 +265,8 @@ export default function GameTable({
           lastScore={gameState.scores?.[gameState.scores.length - 1]}
           isRoundComplete={phase === 'round_complete'}
           totalScores={gameState.totalScores}
+          individualScores={gameState.individualScores}
+          players={gameState.players}
           onNextDeal={() => { setAnalysisText(null); onNextDeal(); }}
           onNewRound={() => { setAnalysisText(null); onNewRound(); }}
           onAnalyse={() => {

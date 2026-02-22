@@ -2,7 +2,10 @@ import React from 'react';
 
 const SUIT_SYMBOLS = { C: '♣', D: '♦', H: '♥', S: '♠', NT: 'NT' };
 
-export default function ScoreSheet({ scores, totalScores, onClose }) {
+export default function ScoreSheet({ scores, totalScores, individualScores, players, onClose }) {
+  // Get player names for column headers
+  const playerName = (seat) => players?.[seat]?.name || seat;
+
   return (
     <div className="score-overlay">
       <div className="score-sheet">
@@ -44,6 +47,26 @@ export default function ScoreSheet({ scores, totalScores, onClose }) {
             </tr>
           </tfoot>
         </table>
+
+        {/* Individual Scores */}
+        {individualScores && (
+          <div className="individual-scores">
+            <h3>Individual Standings</h3>
+            <div className="individual-grid">
+              {['N', 'E', 'S', 'W']
+                .map(seat => ({ seat, name: playerName(seat), score: individualScores[seat] || 0 }))
+                .sort((a, b) => b.score - a.score)
+                .map((p, idx) => (
+                  <div key={p.seat} className={`individual-row ${idx === 0 && scores.length > 0 ? 'leader' : ''}`}>
+                    <span className="individual-rank">{idx + 1}.</span>
+                    <span className="individual-name">{p.name}</span>
+                    <span className="individual-seat">({p.seat})</span>
+                    <span className="individual-score">{p.score}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
