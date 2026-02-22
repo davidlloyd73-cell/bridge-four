@@ -72,6 +72,14 @@ export function startDeal(game) {
     W: calculateHCP(game.hands.W),
   };
 
+  // Save original hands for post-deal review (cards get removed during play)
+  game.originalHands = {
+    N: [...game.hands.N],
+    E: [...game.hands.E],
+    S: [...game.hands.S],
+    W: [...game.hands.W],
+  };
+
   game.bidding = createBiddingState(game.dealer);
   game.contract = null;
   game.currentTrick = [];
@@ -111,6 +119,14 @@ export function processBid(game, seat, bid) {
         score: { NS: 0, EW: 0 },
         vulnerability: { ...game.vulnerability },
         dealer: game.dealer,
+        originalHands: game.originalHands ? {
+          N: [...game.originalHands.N],
+          E: [...game.originalHands.E],
+          S: [...game.originalHands.S],
+          W: [...game.originalHands.W],
+        } : null,
+        biddingHistory: game.bidding ? [...game.bidding.bids] : [],
+        biddingDealer: game.dealer,
       });
       return { success: true, passedOut: true };
     }
@@ -249,6 +265,14 @@ function completeHand(game) {
     score,
     vulnerability: { ...game.vulnerability },
     dealer: game.dealer,
+    originalHands: game.originalHands ? {
+      N: [...game.originalHands.N],
+      E: [...game.originalHands.E],
+      S: [...game.originalHands.S],
+      W: [...game.originalHands.W],
+    } : null,
+    biddingHistory: game.bidding ? [...game.bidding.bids] : [],
+    biddingDealer: game.dealer,
   });
 
   game.totalScores.NS += score.NS;
@@ -337,6 +361,20 @@ export function getClientState(game, forSeat) {
   state.hcp = {};
   if (game.phase !== PHASES.WAITING) {
     state.hcp[forSeat] = game.hcp[forSeat];
+  }
+
+  // Post-deal review: send all hands + bidding from the last completed deal
+  if ((game.phase === PHASES.HAND_COMPLETE || game.phase === PHASES.ROUND_COMPLETE) && game.scores.length > 0) {
+    const lastScore = game.scores[game.scores.length - 1];
+    if (lastScore.originalHands) {
+      state.reviewHands = lastScore.originalHands;
+    }
+    if (lastScore.biddingHistory) {
+      state.reviewBidding = lastScore.biddingHistory;
+      state.reviewBiddingDealer = lastScore.biddingDealer;
+    }
+    // Send HCP for all players during review
+    state.reviewHCP = game.hcp;
   }
 
   return state;

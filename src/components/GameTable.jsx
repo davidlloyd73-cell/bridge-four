@@ -4,6 +4,7 @@ import Card from './Card';
 import BiddingBox, { BiddingHistory } from './BiddingBox';
 import TrickArea from './TrickArea';
 import ScoreSheet from './ScoreSheet';
+import DealReview from './DealReview';
 
 const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
 const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣', NT: 'NT' };
@@ -12,6 +13,7 @@ export default function GameTable({
   gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, error
 }) {
   const [showScores, setShowScores] = useState(false);
+  const [analysisText, setAnalysisText] = useState(null);
 
   const phase = gameState?.phase;
 
@@ -173,27 +175,11 @@ export default function GameTable({
             </div>
           )}
 
-          {/* Hand complete */}
-          {phase === 'hand_complete' && (
+          {/* Hand/Round complete - handled by DealReview overlay */}
+          {(phase === 'hand_complete' || phase === 'round_complete') && (
             <div className="hand-complete">
-              <h2>Hand Complete</h2>
-              {renderLastHandResult(gameState)}
-              <button className="next-btn" onClick={onNextDeal}>Next Deal</button>
-            </div>
-          )}
-
-          {/* Round complete */}
-          {phase === 'round_complete' && (
-            <div className="round-complete">
-              <h2>Round Complete!</h2>
-              {renderLastHandResult(gameState)}
-              <div className="round-totals">
-                <h3>Round Totals</h3>
-                <div className="total">NS: {gameState.totalScores.NS}</div>
-                <div className="total">EW: {gameState.totalScores.EW}</div>
-              </div>
-              <button className="next-btn" onClick={onNewRound}>Start New Round</button>
-              <button className="next-btn" onClick={onNextDeal}>Continue Deals</button>
+              <h2>{phase === 'round_complete' ? 'Round Complete!' : 'Hand Complete'}</h2>
+              <p style={{ color: '#aaa' }}>Review the deal below...</p>
             </div>
           )}
         </div>
@@ -250,6 +236,39 @@ export default function GameTable({
           totalScores={gameState.totalScores}
           onClose={() => setShowScores(false)}
         />
+      )}
+
+      {/* Post-deal review overlay */}
+      {(phase === 'hand_complete' || phase === 'round_complete') && gameState.reviewHands && (
+        <DealReview
+          reviewHands={gameState.reviewHands}
+          reviewBidding={gameState.reviewBidding}
+          reviewBiddingDealer={gameState.reviewBiddingDealer}
+          reviewHCP={gameState.reviewHCP}
+          lastScore={gameState.scores?.[gameState.scores.length - 1]}
+          isRoundComplete={phase === 'round_complete'}
+          totalScores={gameState.totalScores}
+          onNextDeal={() => { setAnalysisText(null); onNextDeal(); }}
+          onNewRound={() => { setAnalysisText(null); onNewRound(); }}
+          onAnalyse={() => {
+            setAnalysisText('Coming soon! Claude analysis of bidding and play will be available in a future update.');
+          }}
+        />
+      )}
+
+      {/* Analysis popup */}
+      {analysisText && (
+        <div className="analysis-overlay" onClick={() => setAnalysisText(null)}>
+          <div className="analysis-popup" onClick={e => e.stopPropagation()}>
+            <div className="analysis-header">
+              <h3>Claude Analysis</h3>
+              <button className="close-btn" onClick={() => setAnalysisText(null)}>&times;</button>
+            </div>
+            <div className="analysis-body">
+              <p>{analysisText}</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
