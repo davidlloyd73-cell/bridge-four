@@ -151,18 +151,31 @@ export function playCard(game, seat, card) {
   if (game.phase !== PHASES.PLAYING) return { error: 'Not in playing phase' };
 
   // Determine who can play
-  const actualPlayer = seat;
   let playingSeat = seat;
+  const declarer = game.contract.declarer;
+  const dummy = game.contract.dummy;
+  const declarerIsBot = game.players[declarer]?.isBot;
 
   // Declarer can play dummy's cards
-  if (seat === game.contract.declarer && game.currentTurn === game.contract.dummy) {
-    playingSeat = game.contract.dummy;
-  } else if (seat !== game.currentTurn) {
+  if (seat === declarer && game.currentTurn === dummy) {
+    playingSeat = dummy;
+  }
+  // When human is dummy and declarer is a bot, human controls both hands
+  else if (seat === dummy && declarerIsBot) {
+    if (game.currentTurn === declarer) {
+      playingSeat = declarer;
+    } else if (game.currentTurn === dummy) {
+      playingSeat = dummy;
+    } else {
+      return { error: 'Not your turn' };
+    }
+  }
+  else if (seat !== game.currentTurn) {
     return { error: 'Not your turn' };
   }
 
-  // Dummy can't play their own cards (declarer does)
-  if (seat === game.contract.dummy) {
+  // Dummy can't play their own cards when declarer is human
+  if (seat === dummy && !declarerIsBot) {
     return { error: 'Declarer plays your cards' };
   }
 
@@ -363,6 +376,16 @@ export function getClientState(game, forSeat) {
     // If it's dummy's turn, declarer controls
     if (game.currentTurn === game.contract?.dummy) {
       state.declarerControlsDummy = true;
+    }
+
+    // When human is dummy and declarer is a bot, human plays both hands
+    const declarer = game.contract?.declarer;
+    const dummy = game.contract?.dummy;
+    if (forSeat === dummy && game.players[declarer]?.isBot) {
+      state.humanPlaysBothHands = true;
+      // Send declarer's hand so human can play it
+      state.declarerHand = game.hands[declarer];
+      state.declarerSeat = declarer;
     }
   }
 

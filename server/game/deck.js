@@ -1,6 +1,7 @@
 // Card constants and deck operations
 
-export const SUITS = ['S', 'H', 'D', 'C'];
+// Alternating black/red for visual clarity: Spades(black), Hearts(red), Clubs(black), Diamonds(red)
+export const SUITS = ['S', 'H', 'C', 'D'];
 export const SUIT_NAMES = { S: 'Spades', H: 'Hearts', D: 'Diamonds', C: 'Clubs' };
 export const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣' };
 

@@ -14,22 +14,29 @@ export default function GameTable({
 }) {
   const [showScores, setShowScores] = useState(false);
   const [analysisText, setAnalysisText] = useState(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
 
   const phase = gameState?.phase;
 
   // Hooks must always be called in the same order (Rules of Hooks)
   // so these must come BEFORE any early returns
+  const humanPlaysBoth = gameState?.humanPlaysBothHands;
+
   const playableCards = useMemo(() => {
     if (phase !== 'playing') return [];
     if (!gameState?.myHand) return [];
 
-    const isMyDirectTurn = gameState.currentTurn === mySeat;
+    // When human plays both hands: my hand (dummy) is playable when it's dummy's turn
+    if (humanPlaysBoth && gameState.currentTurn === mySeat) {
+      return getPlayableFromHand(gameState.myHand, gameState.currentTrick);
+    }
 
+    const isMyDirectTurn = gameState.currentTurn === mySeat;
     if (isMyDirectTurn) {
       return getPlayableFromHand(gameState.myHand, gameState.currentTrick);
     }
     return [];
-  }, [gameState, mySeat, phase]);
+  }, [gameState, mySeat, phase, humanPlaysBoth]);
 
   const dummyPlayableCards = useMemo(() => {
     if (phase !== 'playing') return [];
@@ -38,6 +45,16 @@ export default function GameTable({
     if (!gameState.dummyHand) return [];
     return getPlayableFromHand(gameState.dummyHand, gameState.currentTrick);
   }, [gameState, mySeat, phase]);
+
+  // Playable cards for the declarer's hand when human plays both
+  const declarerPlayableCards = useMemo(() => {
+    if (phase !== 'playing') return [];
+    if (!humanPlaysBoth) return [];
+    if (!gameState?.declarerHand) return [];
+    const declarerSeat = gameState.declarerSeat;
+    if (gameState.currentTurn !== declarerSeat) return [];
+    return getPlayableFromHand(gameState.declarerHand, gameState.currentTrick);
+  }, [gameState, phase, humanPlaysBoth]);
 
   if (!gameState) {
     return (
@@ -151,7 +168,20 @@ export default function GameTable({
           {/* Playing phase - turn/status indicator */}
           {phase === 'playing' && (
             <div className="play-status">
-              {gameState.contract?.dummy === mySeat ? (
+              {humanPlaysBoth ? (
+                // Human is dummy but controls both hands (declarer is bot)
+                <div className="status-your-turn">
+                  <span className="status-icon">&#9654;</span>
+                  <span>
+                    {gameState.currentTurn === mySeat
+                      ? 'Play from your hand (Dummy)'
+                      : gameState.currentTurn === gameState.declarerSeat
+                        ? `Play from ${players[gameState.declarerSeat]?.name}'s hand (Declarer)`
+                        : `Waiting for ${players[gameState.currentTurn]?.name}...`}
+                  </span>
+                  <span className="status-sub">You are playing both hands</span>
+                </div>
+              ) : gameState.contract?.dummy === mySeat ? (
                 <div className="status-dummy">
                   <span className="status-icon">&#128065;</span>
                   <span>You are the Dummy</span>
@@ -211,19 +241,32 @@ export default function GameTable({
           />
         )}
 
-        {/* My hand (bottom) - hide when I am the dummy (shown via dummy hand instead) */}
-        {gameState.myHand && gameState.myHand.length > 0 && gameState.dummySeat !== mySeat && (
+        {/* My hand (bottom) */}
+        {/* When humanPlaysBoth: show my hand at bottom even though I'm dummy */}
+        {gameState.myHand && gameState.myHand.length > 0 && (humanPlaysBoth || gameState.dummySeat !== mySeat) && (
           <Hand
             cards={gameState.myHand}
             onPlayCard={onPlayCard}
-            isMyTurn={gameState.currentTurn === mySeat && phase === 'playing'}
+            isMyTurn={(gameState.currentTurn === mySeat && phase === 'playing') || false}
             playableCards={playableCards}
             position="bottom"
+            isDummy={humanPlaysBoth}
           />
         )}
 
-        {/* Dummy hand (shown when revealed - visible to all players) */}
-        {gameState.dummyHand && gameState.dummySeat && (
+        {/* Declarer's hand (shown when human plays both - at top/partner position) */}
+        {humanPlaysBoth && gameState.declarerHand && gameState.declarerSeat && (
+          <Hand
+            cards={gameState.declarerHand}
+            onPlayCard={onPlayCard}
+            isMyTurn={gameState.currentTurn === gameState.declarerSeat && phase === 'playing'}
+            playableCards={declarerPlayableCards}
+            position={getSeatPosition(gameState.declarerSeat, mySeat)}
+          />
+        )}
+
+        {/* Dummy hand (shown when revealed - visible to all players, but NOT when humanPlaysBoth) */}
+        {!humanPlaysBoth && gameState.dummyHand && gameState.dummySeat && (
           <Hand
             cards={gameState.dummyHand}
             onPlayCard={
@@ -269,26 +312,31 @@ export default function GameTable({
           players={gameState.players}
           onNextDeal={() => { setAnalysisText(null); onNextDeal(); }}
           onNewRound={() => { setAnalysisText(null); onNewRound(); }}
-          onAnalyse={() => {
-            setAnalysisText('Coming soon! Claude analysis of bidding and play will be available in a future update.');
+          analysisLoading={analysisLoading}
+          analysisText={analysisText}
+          onAnalyse={async () => {
+            const lastScore = gameState.scores?.[gameState.scores.length - 1];
+            if (!lastScore) return;
+            setAnalysisLoading(true);
+            setAnalysisText(null);
+            try {
+              const res = await fetch('/api/analyse', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lastScore),
+              });
+              const data = await res.json();
+              setAnalysisText(data.analysis || data.error || 'No response.');
+            } catch (err) {
+              setAnalysisText(`Request failed: ${err.message}`);
+            } finally {
+              setAnalysisLoading(false);
+            }
           }}
         />
       )}
 
-      {/* Analysis popup */}
-      {analysisText && (
-        <div className="analysis-overlay" onClick={() => setAnalysisText(null)}>
-          <div className="analysis-popup" onClick={e => e.stopPropagation()}>
-            <div className="analysis-header">
-              <h3>Claude Analysis</h3>
-              <button className="close-btn" onClick={() => setAnalysisText(null)}>&times;</button>
-            </div>
-            <div className="analysis-body">
-              <p>{analysisText}</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Analysis is shown inline in DealReview */}
     </div>
   );
 }

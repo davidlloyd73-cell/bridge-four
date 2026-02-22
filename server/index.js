@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { createGame, addPlayer, removePlayer, allSeated, startDeal, processBid, playCard, getClientState, PHASES } from './game/game.js';
 import { chooseBid, chooseCard, getBotName } from './game/bot.js';
+import Anthropic from '@anthropic-ai/sdk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,11 +19,104 @@ const io = new Server(httpServer, {
 
 // In production, serve the built React app
 const distPath = join(__dirname, '..', 'dist');
+app.use(express.json());
 app.use(express.static(distPath));
 app.use((req, res, next) => {
   // Don't intercept socket.io or API requests
-  if (req.url.startsWith('/socket.io')) return next();
+  if (req.url.startsWith('/socket.io') || req.url.startsWith('/api')) return next();
   res.sendFile(join(distPath, 'index.html'));
+});
+
+// Claude analysis helper
+const SUIT_NAMES = { S: 'Spades', H: 'Hearts', D: 'Diamonds', C: 'Clubs', NT: 'No Trump' };
+const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
+
+function formatHandForPrompt(cards) {
+  const suits = { S: [], H: [], C: [], D: [] };
+  for (const c of cards) suits[c.suit].push(c.rank);
+  return Object.entries(suits)
+    .map(([s, ranks]) => `${s === 'S' ? '♠' : s === 'H' ? '♥' : s === 'C' ? '♣' : '♦'}: ${ranks.join(' ') || '—'}`)
+    .join('  ');
+}
+
+function formatBidForPrompt(bid) {
+  if (bid.type === 'pass') return 'Pass';
+  if (bid.type === 'double') return 'Double';
+  if (bid.type === 'redouble') return 'Redouble';
+  return `${bid.level}${bid.suit}`;
+}
+
+function buildAnalysisPrompt(dealData) {
+  const { originalHands, biddingHistory, biddingDealer, contract, tricksMade, score, vulnerability, dealer } = dealData;
+
+  let prompt = `Analyse this bridge deal. Be concise but insightful.\n\n`;
+  prompt += `Dealer: ${SEAT_NAMES[dealer]}\n`;
+  prompt += `Vulnerability: NS ${vulnerability.NS ? 'Vulnerable' : 'Not Vulnerable'}, EW ${vulnerability.EW ? 'Vulnerable' : 'Not Vulnerable'}\n\n`;
+
+  prompt += `HANDS:\n`;
+  for (const seat of ['N', 'E', 'S', 'W']) {
+    prompt += `${SEAT_NAMES[seat]}: ${formatHandForPrompt(originalHands[seat])}\n`;
+  }
+
+  prompt += `\nBIDDING (dealer ${SEAT_NAMES[biddingDealer]}):\n`;
+  const bidsByRound = [];
+  let round = [];
+  const seatOrder = ['N', 'E', 'S', 'W'];
+  // Pad initial empty bids before dealer
+  const dealerIdx = seatOrder.indexOf(biddingDealer);
+  for (let i = 0; i < dealerIdx; i++) round.push('—');
+  for (const bid of biddingHistory) {
+    round.push(`${SEAT_NAMES[bid.seat]}: ${formatBidForPrompt(bid)}`);
+    if (round.length === 4) { bidsByRound.push(round.join(' | ')); round = []; }
+  }
+  if (round.length > 0) bidsByRound.push(round.join(' | '));
+  prompt += bidsByRound.join('\n') + '\n';
+
+  if (contract) {
+    const needed = 6 + contract.level;
+    const diff = tricksMade - needed;
+    prompt += `\nCONTRACT: ${contract.level}${SUIT_NAMES[contract.suit]} by ${SEAT_NAMES[contract.declarer]}`;
+    if (contract.doubled) prompt += ' Doubled';
+    if (contract.redoubled) prompt += ' Redoubled';
+    prompt += `\nRESULT: ${tricksMade} tricks (${diff >= 0 ? `made${diff > 0 ? ' +' + diff : ''}` : `down ${Math.abs(diff)}`})`;
+    prompt += `\nSCORE: NS ${score.NS}, EW ${score.EW}\n`;
+  } else {
+    prompt += `\nPassed out - no score\n`;
+  }
+
+  prompt += `\nPlease analyse:\n`;
+  prompt += `1. The bidding - was it reasonable? What would you have bid differently?\n`;
+  prompt += `2. Key points about the hands (HCP distribution, shape, fit)\n`;
+  prompt += `3. Any notable aspects of the deal\n`;
+  prompt += `Keep it conversational and educational, about 150-200 words.`;
+
+  return prompt;
+}
+
+app.post('/api/analyse', async (req, res) => {
+  try {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return res.json({ error: 'ANTHROPIC_API_KEY not set. Set it as an environment variable to enable analysis.' });
+    }
+
+    const client = new Anthropic({ apiKey });
+    const dealData = req.body;
+
+    const prompt = buildAnalysisPrompt(dealData);
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const analysis = message.content[0]?.text || 'No analysis generated.';
+    res.json({ analysis });
+  } catch (err) {
+    console.error('Analysis error:', err.message);
+    res.json({ error: `Analysis failed: ${err.message}` });
+  }
 });
 
 // In-memory game storage
@@ -79,6 +173,11 @@ function scheduleBotAction(game) {
     const dummy = game.contract?.dummy;
     const actingSeat = (turnSeat === dummy) ? declarer : turnSeat;
     const player = game.players[actingSeat];
+
+    // If declarer is bot but dummy is a human, human controls both hands - don't auto-play
+    if (actingSeat === declarer && player?.isBot && game.players[dummy] && !game.players[dummy].isBot) {
+      return; // Human dummy plays as declarer
+    }
 
     if (player?.isBot) {
       // Extra delay after a completed trick so players can see all 4 cards

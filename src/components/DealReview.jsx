@@ -1,5 +1,4 @@
 import React from 'react';
-import Card from './Card';
 import { BiddingHistory } from './BiddingBox';
 
 const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
@@ -15,14 +14,15 @@ function groupBySuit(cards) {
   return groups;
 }
 
-function HandDisplay({ cards, seat, hcp, isDealer, isDeclarer, isDummy }) {
+function HandDisplay({ cards, seat, playerName, hcp, isDealer, isDeclarer, isDummy }) {
   if (!cards || cards.length === 0) return null;
   const suited = groupBySuit(cards);
 
   return (
     <div className={`review-hand review-hand-${seat}`}>
       <div className="review-hand-header">
-        <span className="review-seat-name">{SEAT_NAMES[seat]}</span>
+        <span className="review-seat-name">{playerName || SEAT_NAMES[seat]}</span>
+        <span className="review-seat-label">({SEAT_NAMES[seat]})</span>
         {hcp !== undefined && <span className="review-hcp">{hcp} HCP</span>}
         {isDealer && <span className="review-badge dealer-badge">D</span>}
         {isDeclarer && <span className="review-badge declarer-badge">Declarer</span>}
@@ -59,6 +59,8 @@ export default function DealReview({
   onNextDeal,
   onNewRound,
   onAnalyse,
+  analysisLoading,
+  analysisText,
 }) {
   if (!reviewHands) return null;
 
@@ -66,6 +68,7 @@ export default function DealReview({
   const needed = contract ? 6 + contract.level : 0;
   const made = lastScore?.tricksMade || 0;
   const diff = made - needed;
+  const playerName = (seat) => players?.[seat]?.name || SEAT_NAMES[seat];
 
   return (
     <div className="deal-review-overlay">
@@ -78,7 +81,7 @@ export default function DealReview({
             <>
               <span className="review-contract">
                 {contract.level}{SUIT_SYMBOLS[contract.suit]}
-                {contract.doubled ? 'X' : ''}{contract.redoubled ? 'XX' : ''} by {SEAT_NAMES[contract.declarer]}
+                {contract.doubled ? 'X' : ''}{contract.redoubled ? 'XX' : ''} by {playerName(contract.declarer)}
               </span>
               <span className="review-tricks">
                 {made} tricks ({diff >= 0 ? `made${diff > 0 ? ' +' + diff : ''}` : `down ${Math.abs(diff)}`})
@@ -100,6 +103,7 @@ export default function DealReview({
               <HandDisplay
                 cards={reviewHands.N}
                 seat="N"
+                playerName={playerName('N')}
                 hcp={reviewHCP?.N}
                 isDealer={reviewBiddingDealer === 'N'}
                 isDeclarer={contract?.declarer === 'N'}
@@ -110,6 +114,7 @@ export default function DealReview({
               <HandDisplay
                 cards={reviewHands.W}
                 seat="W"
+                playerName={playerName('W')}
                 hcp={reviewHCP?.W}
                 isDealer={reviewBiddingDealer === 'W'}
                 isDeclarer={contract?.declarer === 'W'}
@@ -119,6 +124,7 @@ export default function DealReview({
               <HandDisplay
                 cards={reviewHands.E}
                 seat="E"
+                playerName={playerName('E')}
                 hcp={reviewHCP?.E}
                 isDealer={reviewBiddingDealer === 'E'}
                 isDeclarer={contract?.declarer === 'E'}
@@ -129,6 +135,7 @@ export default function DealReview({
               <HandDisplay
                 cards={reviewHands.S}
                 seat="S"
+                playerName={playerName('S')}
                 hcp={reviewHCP?.S}
                 isDealer={reviewBiddingDealer === 'S'}
                 isDeclarer={contract?.declarer === 'S'}
@@ -146,6 +153,18 @@ export default function DealReview({
           )}
         </div>
 
+        {/* Claude Analysis result */}
+        {(analysisText || analysisLoading) && (
+          <div className="review-analysis">
+            <h3>Claude's Analysis</h3>
+            {analysisLoading ? (
+              <div className="analysis-loading">Analysing deal...</div>
+            ) : (
+              <div className="analysis-text">{analysisText}</div>
+            )}
+          </div>
+        )}
+
         {/* Individual standings */}
         {individualScores && (
           <div className="review-standings">
@@ -154,7 +173,7 @@ export default function DealReview({
               {['N', 'E', 'S', 'W']
                 .map(seat => ({
                   seat,
-                  name: players?.[seat]?.name || SEAT_NAMES[seat],
+                  name: playerName(seat),
                   score: individualScores[seat] || 0,
                 }))
                 .sort((a, b) => b.score - a.score)
@@ -171,8 +190,12 @@ export default function DealReview({
 
         {/* Action buttons */}
         <div className="review-actions">
-          <button className="review-btn analyse-btn" onClick={onAnalyse}>
-            Analyse with Claude
+          <button
+            className="review-btn analyse-btn"
+            onClick={onAnalyse}
+            disabled={analysisLoading}
+          >
+            {analysisLoading ? 'Analysing...' : analysisText ? 'Re-analyse' : 'Analyse with Claude'}
           </button>
           {isRoundComplete ? (
             <>
