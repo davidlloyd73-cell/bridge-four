@@ -1,0 +1,543 @@
+/* ── Page wrapper ──────────────────────────────────────────────────────────── */
+
+.corkboard-page {
+  /* Bleed past the layout's side padding to fill edge-to-edge */
+  margin: 0 calc(-1 * var(--space-lg));
+  margin-top: calc(-1 * var(--space-md));
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 120px);
+}
+
+/* ── Cork wall ─────────────────────────────────────────────────────────────── */
+
+.cork-surface {
+  flex: 1;
+  padding: var(--space-lg);
+  padding-bottom: 100px; /* room for FAB */
+
+  /* Cork colour */
+  background-color: #C49330;
+
+  /* Cork grain — overlapping ellipses at irregular positions */
+  background-image:
+    /* dark fibres */
+    radial-gradient(ellipse 5px 9px  at  7% 11%, rgba(100,60,5,0.55) 0%, transparent 100%),
+    radial-gradient(ellipse 8px 5px  at 22% 38%, rgba(110,65,8,0.45) 0%, transparent 100%),
+    radial-gradient(ellipse 4px 7px  at 41% 19%, rgba( 90,50,3,0.50) 0%, transparent 100%),
+    radial-gradient(ellipse 6px 4px  at 58% 47%, rgba(105,62,7,0.45) 0%, transparent 100%),
+    radial-gradient(ellipse 5px 8px  at 76% 28%, rgba( 95,55,4,0.50) 0%, transparent 100%),
+    radial-gradient(ellipse 7px 4px  at 14% 64%, rgba(108,63,6,0.45) 0%, transparent 100%),
+    radial-gradient(ellipse 4px 7px  at 33% 81%, rgba( 92,52,4,0.50) 0%, transparent 100%),
+    radial-gradient(ellipse 6px 5px  at 52% 72%, rgba(100,58,5,0.45) 0%, transparent 100%),
+    radial-gradient(ellipse 5px 8px  at 69% 88%, rgba( 96,56,4,0.50) 0%, transparent 100%),
+    radial-gradient(ellipse 8px 4px  at 88% 60%, rgba(104,61,6,0.45) 0%, transparent 100%),
+    radial-gradient(ellipse 4px 6px  at 93% 15%, rgba( 98,57,5,0.50) 0%, transparent 100%),
+    radial-gradient(ellipse 7px 4px  at 46% 55%, rgba(102,60,6,0.40) 0%, transparent 100%),
+    /* light highlights */
+    radial-gradient(ellipse 12px 8px at 30% 25%, rgba(220,175,80,0.22) 0%, transparent 100%),
+    radial-gradient(ellipse  9px 6px at 65% 55%, rgba(215,168,72,0.18) 0%, transparent 100%),
+    radial-gradient(ellipse 11px 7px at 80% 20%, rgba(210,165,70,0.20) 0%, transparent 100%);
+  background-size: 130px 90px;
+
+  /* Wooden frame effect */
+  border: 7px solid #7A5015;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 50px rgba(0,0,0,0.18),
+    0 6px 20px rgba(0,0,0,0.22);
+}
+
+/* ── Top bar ───────────────────────────────────────────────────────────────── */
+
+.cork-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.cork-heading {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  color: #FFF8E7;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  margin-bottom: 2px;
+}
+
+.cork-subtext {
+  font-size: 0.75rem;
+  color: rgba(255,245,220,0.8);
+}
+
+.archive-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.25);
+  color: #FFF8E7;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.archive-link-btn:hover {
+  background: rgba(0,0,0,0.38);
+  color: #FFF8E7;
+}
+
+.archive-badge {
+  background: var(--color-terracotta);
+  color: white;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* ── Channel hint ──────────────────────────────────────────────────────────── */
+
+.cork-channel-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: var(--space-lg);
+  font-size: 0.78rem;
+  color: rgba(255,245,215,0.9);
+  line-height: 1.5;
+}
+
+.cork-channel-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Empty state ───────────────────────────────────────────────────────────── */
+
+.cork-empty {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+  color: rgba(255,245,215,0.85);
+}
+
+.cork-empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+
+.cork-empty p {
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.cork-empty-hint {
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
+/* ── Pin grid (CSS columns = masonry) ─────────────────────────────────────── */
+
+.pin-grid {
+  columns: 2;
+  column-gap: 18px;
+}
+
+@media (min-width: 480px) {
+  .pin-grid { columns: 3; }
+}
+
+@media (min-width: 700px) {
+  .pin-grid { columns: 4; }
+}
+
+.pin-wrapper {
+  break-inside: avoid;
+  margin-bottom: 18px;
+}
+
+/* ── Individual pin card ───────────────────────────────────────────────────── */
+
+.pin-card {
+  position: relative;
+  background: var(--pin-bg, #FFF9A0);
+  transform: rotate(var(--pin-rotate, 0deg));
+  padding: 26px 12px 10px;
+  border-radius: 2px;
+  box-shadow:
+    2px 3px 8px rgba(0,0,0,0.32),
+    0 1px 2px rgba(0,0,0,0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.pin-card:hover {
+  transform: rotate(calc(var(--pin-rotate, 0deg) * 0.4)) scale(1.025);
+  box-shadow:
+    4px 6px 18px rgba(0,0,0,0.38),
+    0 2px 4px rgba(0,0,0,0.20);
+  z-index: 2;
+}
+
+/* ── Thumbtack ─────────────────────────────────────────────────────────────── */
+
+.tack {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 40px;
+  z-index: 3;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+}
+
+/* ── Remove button ─────────────────────────────────────────────────────────── */
+
+.pin-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.45);
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  z-index: 4;
+}
+
+.pin-card:hover .pin-remove {
+  opacity: 1;
+}
+
+.pin-remove:hover {
+  background: rgba(0,0,0,0.28);
+  color: rgba(0,0,0,0.7);
+}
+
+/* ── Pin body ──────────────────────────────────────────────────────────────── */
+
+.pin-body {
+  font-size: 0.82rem;
+  color: #2a1a0a;
+  line-height: 1.5;
+}
+
+.pin-text {
+  margin: 0;
+  word-break: break-word;
+}
+
+.pin-text--sm {
+  font-size: 0.76rem;
+  margin-top: 6px;
+  opacity: 0.8;
+}
+
+/* Photo */
+.pin-photo {
+  width: 100%;
+  border-radius: 2px;
+  display: block;
+  margin-bottom: 6px;
+  object-fit: cover;
+  max-height: 160px;
+}
+
+.pin-photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 80px;
+  background: rgba(0,0,0,0.07);
+  border-radius: 2px;
+  margin-bottom: 6px;
+  color: rgba(0,0,0,0.35);
+  font-size: 0.7rem;
+}
+
+.pin-caption {
+  font-size: 0.78rem;
+  color: #2a1a0a;
+  margin: 0;
+}
+
+/* Link */
+.pin-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  color: #1a4a80;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.pin-link svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pin-link-ext {
+  flex-shrink: 0;
+  margin-top: 3px;
+  opacity: 0.5;
+}
+
+/* Timetable */
+.pin-timetable-title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  margin: 0 0 6px;
+  color: #1a0a00;
+}
+
+.pin-timetable {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pin-timetable-row {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.74rem;
+  border-left: 2px solid rgba(0,0,0,0.18);
+  padding-left: 6px;
+}
+
+.pin-timetable-day {
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: #3a1a00;
+}
+
+.pin-timetable-time {
+  font-size: 0.7rem;
+  color: rgba(0,0,0,0.55);
+}
+
+.pin-timetable-event {
+  color: #1a0a00;
+}
+
+/* ── Pin footer ────────────────────────────────────────────────────────────── */
+
+.pin-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0,0,0,0.10);
+  font-size: 0.68rem;
+  color: rgba(0,0,0,0.45);
+}
+
+.pin-from {
+  font-weight: 600;
+  color: rgba(0,0,0,0.55);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pin-expiry {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.pin-expiry--soon {
+  color: #C03A2B;
+  font-weight: 600;
+}
+
+/* ── FAB ───────────────────────────────────────────────────────────────────── */
+
+.cork-fab {
+  position: fixed;
+  bottom: calc(70px + var(--space-md));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-terracotta);
+  color: white;
+  border-radius: 28px;
+  padding: 12px 22px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(196, 112, 75, 0.5);
+  z-index: 50;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.cork-fab:hover {
+  background: var(--color-terracotta-light);
+  box-shadow: 0 6px 22px rgba(196, 112, 75, 0.6);
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.cork-fab:active {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Modal: type picker ────────────────────────────────────────────────────── */
+
+.type-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.type-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--color-sand);
+  background: white;
+  color: var(--color-warm-gray);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.type-btn--active {
+  border-color: var(--color-terracotta);
+  background: var(--color-terracotta);
+  color: white;
+}
+
+/* ── Modal: color picker ───────────────────────────────────────────────────── */
+
+.color-picker {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+.color-dot--selected {
+  border-color: var(--color-terracotta);
+  transform: scale(1.2);
+}
+
+/* ── Modal: timetable rows ─────────────────────────────────────────────────── */
+
+.timetable-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timetable-row-edit {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.tt-day   { flex: 2; min-width: 0; }
+.tt-time  { flex: 1; min-width: 0; }
+.tt-event { flex: 3; min-width: 0; }
+
+.tt-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.07);
+  color: var(--color-warm-gray);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.tt-remove:hover {
+  background: var(--color-rose-light);
+  color: var(--color-rose);
+}
+
+/* ── Buttons (shared with rest of app) ─────────────────────────────────────── */
+
+.btn {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn--primary {
+  background: var(--color-terracotta);
+  color: white;
+}
+
+.btn--primary:hover {
+  background: var(--color-terracotta-light);
+}
+
+.btn--secondary {
+  background: var(--color-sand);
+  color: var(--color-dark-brown);
+}
+
+.btn--secondary:hover {
+  background: #e8ddd3;
+}
+
+.btn--small {
+  padding: 5px var(--space-md);
+  font-size: 0.82rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--space-md);
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-brown);
+}

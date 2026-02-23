@@ -43,11 +43,12 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: var(--space-xs) var(--space-lg);
+  padding: var(--space-xs) var(--space-md);
   color: var(--color-warm-gray);
   text-decoration: none;
   transition: color 0.2s;
   -webkit-tap-highlight-color: transparent;
+  flex: 1;
 }
 
 .nav-item--active {
@@ -71,7 +72,7 @@
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
   .nav-item {
-    padding: var(--space-sm) var(--space-xl);
+    padding: var(--space-sm) var(--space-lg);
   }
   .nav-label {
     font-size: 0.75rem;

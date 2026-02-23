@@ -89,6 +89,19 @@ export function FamilyProvider({ children }) {
     }));
   }, [updateData]);
 
+  const addCorkPin = useCallback((pin) => {
+    const id = 'cp' + Date.now();
+    updateData(prev => ({
+      corkPins: [...(prev.corkPins || []), { ...pin, id }],
+    }));
+  }, [updateData]);
+
+  const removeFromWall = useCallback((id) => {
+    updateData(prev => ({
+      corkPins: (prev.corkPins || []).map(p => p.id === id ? { ...p, removed: true } : p),
+    }));
+  }, [updateData]);
+
   const value = {
     ...data,
     getPerson,
@@ -102,6 +115,8 @@ export function FamilyProvider({ children }) {
     addEvent,
     addPerson,
     updatePerson,
+    addCorkPin,
+    removeFromWall,
     updateData,
   };
 

@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import Corkboard from './pages/Corkboard';
+import Archive from './pages/Archive';
 import Journal from './pages/Journal';
 import MemoryBank from './pages/MemoryBank';
 import Digest from './pages/Digest';
@@ -11,6 +13,8 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/corkboard" element={<Corkboard />} />
+        <Route path="/archive" element={<Archive />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/journal/:childId" element={<Journal />} />
         <Route path="/memories" element={<MemoryBank />} />

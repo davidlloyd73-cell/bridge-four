@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, Mic, Mail } from 'lucide-react';
+import { Home, BookOpen, Mic, Mail, Pin } from 'lucide-react';
 import './Layout.css';
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home' },
+  { to: '/corkboard', icon: Pin, label: 'Board' },
   { to: '/journal', icon: BookOpen, label: 'Journal' },
   { to: '/memories', icon: Mic, label: 'Memories' },
   { to: '/digest', icon: Mail, label: 'Digest' },
