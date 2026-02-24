@@ -12,7 +12,8 @@ export default function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Navigate to="/corkboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/corkboard" element={<Corkboard />} />
         <Route path="/archive" element={<Archive />} />
         <Route path="/journal" element={<Journal />} />

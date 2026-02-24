@@ -3,7 +3,7 @@ import { Home, BookOpen, Mic, Mail, Pin } from 'lucide-react';
 import './Layout.css';
 
 const navItems = [
-  { to: '/', icon: Home, label: 'Home' },
+  { to: '/dashboard', icon: Home, label: 'Home' },
   { to: '/corkboard', icon: Pin, label: 'Board' },
   { to: '/journal', icon: BookOpen, label: 'Journal' },
   { to: '/memories', icon: Mic, label: 'Memories' },
