@@ -1,0 +1,401 @@
+/* ── Cork surface ─────────────────────────────────────────────────────────── */
+
+.corkboard-page {
+  position: relative;
+  min-height: calc(100vh - 60px);
+}
+
+.cork-surface {
+  padding: var(--space-md) var(--space-md);
+  /* warm cork texture */
+  background-color: #c8a882;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23c8a882'/%3E%3Ccircle cx='1' cy='1' r='0.8' fill='%23b8956a' opacity='0.4'/%3E%3Ccircle cx='3' cy='3' r='0.6' fill='%23d4b48a' opacity='0.3'/%3E%3C/svg%3E");
+  min-height: calc(100vh - 60px);
+}
+
+/* ── Loading / empty / error states ──────────────────────────────────────── */
+
+.cork-loading,
+.cork-empty,
+.cork-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl) var(--space-lg);
+  text-align: center;
+  color: rgba(0,0,0,0.5);
+}
+
+.cork-empty-icon { font-size: 3rem; }
+.cork-empty-hint { font-size: 0.875rem; opacity: 0.8; }
+.cork-error { color: #c0392b; }
+
+/* ── Pin grid ─────────────────────────────────────────────────────────────── */
+
+.pin-grid {
+  columns: 2;
+  column-gap: var(--space-md);
+}
+
+@media (min-width: 500px) {
+  .pin-grid { columns: 3; }
+}
+
+@media (min-width: 768px) {
+  .pin-grid { columns: 4; }
+}
+
+.pin-wrapper {
+  break-inside: avoid;
+  margin-bottom: var(--space-md);
+}
+
+/* ── Individual pin card ──────────────────────────────────────────────────── */
+
+.pin-card {
+  position: relative;
+  background: #fff8f0;
+  border-radius: 3px;
+  box-shadow:
+    2px 3px 8px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.1);
+  transform: rotate(var(--pin-rotate, 0deg));
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.pin-card:hover {
+  transform: rotate(var(--pin-rotate, 0deg)) scale(1.02);
+  box-shadow: 4px 6px 16px rgba(0,0,0,0.3);
+}
+
+/* Thumbtack */
+.tack {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 40px;
+  z-index: 2;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+}
+
+/* Remove button */
+.pin-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  background: rgba(0,0,0,0.45);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.pin-card:hover .pin-remove,
+.pin-card:focus-within .pin-remove {
+  opacity: 1;
+}
+
+/* Make remove always visible on touch devices */
+@media (hover: none) {
+  .pin-remove { opacity: 1; }
+}
+
+.pin-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: auto;
+  object-fit: cover;
+  margin-top: 20px; /* space for tack */
+}
+
+.pin-caption {
+  padding: 6px 8px 2px;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: #3a2e26;
+}
+
+.pin-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 8px 6px;
+  gap: 4px;
+}
+
+.pin-from {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #5a4534;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pin-expiry {
+  font-size: 0.65rem;
+  color: #8a7060;
+  white-space: nowrap;
+}
+
+.pin-expiry--soon {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+/* ── FAB ──────────────────────────────────────────────────────────────────── */
+
+.cork-fab {
+  position: fixed;
+  bottom: max(24px, env(safe-area-inset-bottom, 24px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-terracotta);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 14px 26px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  transition: background 0.15s, transform 0.1s;
+  z-index: 50;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cork-fab:active {
+  transform: translateX(-50%) scale(0.96);
+}
+
+/* ── Modal ────────────────────────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-sheet {
+  background: var(--color-warm-white);
+  border-radius: 20px 20px 0 0;
+  padding: var(--space-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  color: var(--color-dark-brown);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-warm-gray);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+/* Photo picker */
+.photo-picker {
+  border: 2px dashed var(--color-sand);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  overflow: hidden;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-sand);
+  transition: border-color 0.15s;
+}
+
+.photo-picker:hover {
+  border-color: var(--color-terracotta);
+}
+
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-warm-gray);
+  padding: var(--space-lg);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.photo-preview {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Form */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-dark-brown);
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--color-warm-gray);
+}
+
+.form-group input {
+  border: 1px solid var(--color-sand);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #fff;
+  color: var(--color-dark-brown);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-terracotta);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+
+.btn--primary {
+  background: var(--color-terracotta);
+  color: white;
+}
+
+.btn--primary:hover { opacity: 0.9; }
+.btn--primary:disabled,
+.btn--secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn--secondary {
+  background: var(--color-sand);
+  color: var(--color-brown);
+}
+
+.btn--secondary:hover {
+  background: var(--color-warm-gray);
+  color: white;
+}
+
+.upload-error {
+  color: #c0392b;
+  font-size: 0.85rem;
+}
+
+/* Spinner animation */
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Setup screen ─────────────────────────────────────────────────────────── */
+
+.setup-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  padding: var(--space-lg);
+}
+
+.setup-card {
+  background: var(--color-warm-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+
+.setup-icon { font-size: 3rem; display: block; margin-bottom: var(--space-md); }
+
+.setup-card h2 {
+  color: var(--color-dark-brown);
+  margin-bottom: var(--space-sm);
+}
+
+.setup-card p {
+  color: var(--color-warm-gray);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+}
+
+.setup-card ol {
+  text-align: left;
+  color: var(--color-warm-gray);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  padding-left: var(--space-lg);
+}
+
+.setup-card code {
+  background: var(--color-sand);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.82em;
+}

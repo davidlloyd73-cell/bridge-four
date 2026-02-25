@@ -1,36 +1,32 @@
-import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, Mic, Mail } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Archive } from 'lucide-react';
 import './Layout.css';
 
-const navItems = [
-  { to: '/', icon: Home, label: 'Home' },
-  { to: '/journal', icon: BookOpen, label: 'Journal' },
-  { to: '/memories', icon: Mic, label: 'Memories' },
-  { to: '/digest', icon: Mail, label: 'Digest' },
-];
-
 export default function Layout({ children }) {
+  const { pathname } = useLocation();
+  const onArchive = pathname === '/archive';
+
   return (
     <div className="layout">
       <header className="layout-header">
-        <h1 className="layout-title">Family Hub</h1>
+        <Link to="/" className="layout-title-link">
+          <h1 className="layout-title">Bridge Four</h1>
+        </Link>
+        {!onArchive && (
+          <Link to="/archive" className="layout-archive-link">
+            <Archive size={18} />
+            <span>Archive</span>
+          </Link>
+        )}
+        {onArchive && (
+          <Link to="/" className="layout-archive-link">
+            ← Board
+          </Link>
+        )}
       </header>
       <main className="layout-main">
         {children}
       </main>
-      <nav className="layout-nav" aria-label="Main navigation">
-        {navItems.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) => `nav-item ${isActive ? 'nav-item--active' : ''}`}
-          >
-            <Icon size={22} strokeWidth={1.8} />
-            <span className="nav-label">{label}</span>
-          </NavLink>
-        ))}
-      </nav>
     </div>
   );
 }
