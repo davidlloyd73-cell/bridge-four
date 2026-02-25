@@ -7,74 +7,43 @@
 }
 
 .layout-header {
-  padding: var(--space-lg) var(--space-lg) var(--space-md);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-sand);
+}
+
+.layout-title-link {
+  text-decoration: none;
 }
 
 .layout-title {
   color: var(--color-dark-brown);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   letter-spacing: -0.02em;
+}
+
+.layout-archive-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-warm-gray);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  transition: background 0.15s, color 0.15s;
+}
+
+.layout-archive-link:hover {
+  background: var(--color-sand);
+  color: var(--color-dark-brown);
 }
 
 .layout-main {
   flex: 1;
-  padding: 0 var(--space-lg) var(--space-2xl);
-  padding-bottom: calc(var(--space-2xl) + 70px); /* space for fixed nav */
-}
-
-.layout-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  background: var(--color-warm-white);
-  border-top: 1px solid var(--color-sand);
-  padding: var(--space-sm) 0;
-  padding-bottom: max(var(--space-sm), env(safe-area-inset-bottom));
-  z-index: 100;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: var(--space-xs) var(--space-md);
-  color: var(--color-warm-gray);
-  text-decoration: none;
-  transition: color 0.2s;
-  -webkit-tap-highlight-color: transparent;
-  flex: 1;
-}
-
-.nav-item--active {
-  color: var(--color-terracotta);
-}
-
-.nav-label {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-@media (min-width: 768px) {
-  .layout {
-    max-width: 900px;
-  }
-  .layout-nav {
-    max-width: 900px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  }
-  .nav-item {
-    padding: var(--space-sm) var(--space-lg);
-  }
-  .nav-label {
-    font-size: 0.75rem;
-  }
+  padding: 0;
+  padding-bottom: 100px; /* space for FAB */
 }

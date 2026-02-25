@@ -1,502 +1,322 @@
-/* ── Page wrapper ──────────────────────────────────────────────────────────── */
+/* ── Cork surface ─────────────────────────────────────────────────────────── */
 
 .corkboard-page {
-  /* Bleed past the layout's side padding to fill edge-to-edge */
-  margin: 0 calc(-1 * var(--space-lg));
-  margin-top: calc(-1 * var(--space-md));
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 120px);
+  position: relative;
+  min-height: calc(100vh - 60px);
 }
-
-/* ── Cork wall ─────────────────────────────────────────────────────────────── */
 
 .cork-surface {
-  flex: 1;
-  padding: var(--space-lg);
-  padding-bottom: 100px; /* room for FAB */
-
-  /* Cork colour */
-  background-color: #C49330;
-
-  /* Cork grain — overlapping ellipses at irregular positions */
+  padding: var(--space-md) var(--space-md);
+  /* warm cork texture */
+  background-color: #c8a882;
   background-image:
-    /* dark fibres */
-    radial-gradient(ellipse 5px 9px  at  7% 11%, rgba(100,60,5,0.55) 0%, transparent 100%),
-    radial-gradient(ellipse 8px 5px  at 22% 38%, rgba(110,65,8,0.45) 0%, transparent 100%),
-    radial-gradient(ellipse 4px 7px  at 41% 19%, rgba( 90,50,3,0.50) 0%, transparent 100%),
-    radial-gradient(ellipse 6px 4px  at 58% 47%, rgba(105,62,7,0.45) 0%, transparent 100%),
-    radial-gradient(ellipse 5px 8px  at 76% 28%, rgba( 95,55,4,0.50) 0%, transparent 100%),
-    radial-gradient(ellipse 7px 4px  at 14% 64%, rgba(108,63,6,0.45) 0%, transparent 100%),
-    radial-gradient(ellipse 4px 7px  at 33% 81%, rgba( 92,52,4,0.50) 0%, transparent 100%),
-    radial-gradient(ellipse 6px 5px  at 52% 72%, rgba(100,58,5,0.45) 0%, transparent 100%),
-    radial-gradient(ellipse 5px 8px  at 69% 88%, rgba( 96,56,4,0.50) 0%, transparent 100%),
-    radial-gradient(ellipse 8px 4px  at 88% 60%, rgba(104,61,6,0.45) 0%, transparent 100%),
-    radial-gradient(ellipse 4px 6px  at 93% 15%, rgba( 98,57,5,0.50) 0%, transparent 100%),
-    radial-gradient(ellipse 7px 4px  at 46% 55%, rgba(102,60,6,0.40) 0%, transparent 100%),
-    /* light highlights */
-    radial-gradient(ellipse 12px 8px at 30% 25%, rgba(220,175,80,0.22) 0%, transparent 100%),
-    radial-gradient(ellipse  9px 6px at 65% 55%, rgba(215,168,72,0.18) 0%, transparent 100%),
-    radial-gradient(ellipse 11px 7px at 80% 20%, rgba(210,165,70,0.20) 0%, transparent 100%);
-  background-size: 130px 90px;
-
-  /* Wooden frame effect */
-  border: 7px solid #7A5015;
-  border-radius: 6px;
-  box-shadow:
-    inset 0 0 50px rgba(0,0,0,0.18),
-    0 6px 20px rgba(0,0,0,0.22);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23c8a882'/%3E%3Ccircle cx='1' cy='1' r='0.8' fill='%23b8956a' opacity='0.4'/%3E%3Ccircle cx='3' cy='3' r='0.6' fill='%23d4b48a' opacity='0.3'/%3E%3C/svg%3E");
+  min-height: calc(100vh - 60px);
 }
 
-/* ── Top bar ───────────────────────────────────────────────────────────────── */
+/* ── Loading / empty / error states ──────────────────────────────────────── */
 
-.cork-topbar {
+.cork-loading,
+.cork-empty,
+.cork-error {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-md);
-  margin-bottom: var(--space-sm);
-}
-
-.cork-heading {
-  font-family: var(--font-heading);
-  font-size: 1.3rem;
-  color: #FFF8E7;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-  margin-bottom: 2px;
-}
-
-.cork-subtext {
-  font-size: 0.75rem;
-  color: rgba(255,245,220,0.8);
-}
-
-.archive-link-btn {
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
-  background: rgba(0,0,0,0.25);
-  color: #FFF8E7;
-  border-radius: 20px;
-  padding: 5px 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-decoration: none;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.2s;
-}
-
-.archive-link-btn:hover {
-  background: rgba(0,0,0,0.38);
-  color: #FFF8E7;
-}
-
-.archive-badge {
-  background: var(--color-terracotta);
-  color: white;
-  border-radius: 10px;
-  padding: 1px 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-/* ── Channel hint ──────────────────────────────────────────────────────────── */
-
-.cork-channel-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  background: rgba(0,0,0,0.2);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  margin-bottom: var(--space-lg);
-  font-size: 0.78rem;
-  color: rgba(255,245,215,0.9);
-  line-height: 1.5;
-}
-
-.cork-channel-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-/* ── Empty state ───────────────────────────────────────────────────────────── */
-
-.cork-empty {
-  text-align: center;
+  justify-content: center;
+  gap: var(--space-md);
   padding: var(--space-2xl) var(--space-lg);
-  color: rgba(255,245,215,0.85);
+  text-align: center;
+  color: rgba(0,0,0,0.5);
 }
 
-.cork-empty-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: var(--space-sm);
-}
+.cork-empty-icon { font-size: 3rem; }
+.cork-empty-hint { font-size: 0.875rem; opacity: 0.8; }
+.cork-error { color: #c0392b; }
 
-.cork-empty p {
-  margin-bottom: 4px;
-  font-size: 1rem;
-}
-
-.cork-empty-hint {
-  font-size: 0.82rem;
-  opacity: 0.75;
-}
-
-/* ── Pin grid (CSS columns = masonry) ─────────────────────────────────────── */
+/* ── Pin grid ─────────────────────────────────────────────────────────────── */
 
 .pin-grid {
   columns: 2;
-  column-gap: 18px;
+  column-gap: var(--space-md);
 }
 
-@media (min-width: 480px) {
+@media (min-width: 500px) {
   .pin-grid { columns: 3; }
 }
 
-@media (min-width: 700px) {
+@media (min-width: 768px) {
   .pin-grid { columns: 4; }
 }
 
 .pin-wrapper {
   break-inside: avoid;
-  margin-bottom: 18px;
+  margin-bottom: var(--space-md);
 }
 
-/* ── Individual pin card ───────────────────────────────────────────────────── */
+/* ── Individual pin card ──────────────────────────────────────────────────── */
 
 .pin-card {
   position: relative;
-  background: var(--pin-bg, #FFF9A0);
-  transform: rotate(var(--pin-rotate, 0deg));
-  padding: 26px 12px 10px;
-  border-radius: 2px;
+  background: #fff8f0;
+  border-radius: 3px;
   box-shadow:
-    2px 3px 8px rgba(0,0,0,0.32),
-    0 1px 2px rgba(0,0,0,0.18);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: default;
+    2px 3px 8px rgba(0,0,0,0.25),
+    0 1px 2px rgba(0,0,0,0.1);
+  transform: rotate(var(--pin-rotate, 0deg));
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .pin-card:hover {
-  transform: rotate(calc(var(--pin-rotate, 0deg) * 0.4)) scale(1.025);
-  box-shadow:
-    4px 6px 18px rgba(0,0,0,0.38),
-    0 2px 4px rgba(0,0,0,0.20);
-  z-index: 2;
+  transform: rotate(var(--pin-rotate, 0deg)) scale(1.02);
+  box-shadow: 4px 6px 16px rgba(0,0,0,0.3);
 }
 
-/* ── Thumbtack ─────────────────────────────────────────────────────────────── */
-
+/* Thumbtack */
 .tack {
   position: absolute;
-  top: -12px;
+  top: -8px;
   left: 50%;
   transform: translateX(-50%);
   width: 22px;
   height: 40px;
-  z-index: 3;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+  z-index: 2;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
 }
 
-/* ── Remove button ─────────────────────────────────────────────────────────── */
-
+/* Remove button */
 .pin-remove {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  background: rgba(0,0,0,0.45);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.12);
-  color: rgba(0,0,0,0.45);
+  color: #fff;
+  cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s, background 0.15s;
-  z-index: 4;
+  transition: opacity 0.15s;
 }
 
-.pin-card:hover .pin-remove {
+.pin-card:hover .pin-remove,
+.pin-card:focus-within .pin-remove {
   opacity: 1;
 }
 
-.pin-remove:hover {
-  background: rgba(0,0,0,0.28);
-  color: rgba(0,0,0,0.7);
+/* Make remove always visible on touch devices */
+@media (hover: none) {
+  .pin-remove { opacity: 1; }
 }
 
-/* ── Pin body ──────────────────────────────────────────────────────────────── */
-
-.pin-body {
-  font-size: 0.82rem;
-  color: #2a1a0a;
-  line-height: 1.5;
-}
-
-.pin-text {
-  margin: 0;
-  word-break: break-word;
-}
-
-.pin-text--sm {
-  font-size: 0.76rem;
-  margin-top: 6px;
-  opacity: 0.8;
-}
-
-/* Photo */
 .pin-photo {
-  width: 100%;
-  border-radius: 2px;
   display: block;
-  margin-bottom: 6px;
+  width: 100%;
+  aspect-ratio: auto;
   object-fit: cover;
-  max-height: 160px;
-}
-
-.pin-photo-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  height: 80px;
-  background: rgba(0,0,0,0.07);
-  border-radius: 2px;
-  margin-bottom: 6px;
-  color: rgba(0,0,0,0.35);
-  font-size: 0.7rem;
+  margin-top: 20px; /* space for tack */
 }
 
 .pin-caption {
+  padding: 6px 8px 2px;
   font-size: 0.78rem;
-  color: #2a1a0a;
-  margin: 0;
+  line-height: 1.3;
+  color: #3a2e26;
 }
-
-/* Link */
-.pin-link {
-  display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  color: #1a4a80;
-  font-size: 0.8rem;
-  text-decoration: underline;
-  word-break: break-word;
-  line-height: 1.4;
-}
-
-.pin-link svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.pin-link-ext {
-  flex-shrink: 0;
-  margin-top: 3px;
-  opacity: 0.5;
-}
-
-/* Timetable */
-.pin-timetable-title {
-  font-weight: 600;
-  font-size: 0.8rem;
-  margin: 0 0 6px;
-  color: #1a0a00;
-}
-
-.pin-timetable {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.pin-timetable-row {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.74rem;
-  border-left: 2px solid rgba(0,0,0,0.18);
-  padding-left: 6px;
-}
-
-.pin-timetable-day {
-  font-weight: 600;
-  font-size: 0.72rem;
-  color: #3a1a00;
-}
-
-.pin-timetable-time {
-  font-size: 0.7rem;
-  color: rgba(0,0,0,0.55);
-}
-
-.pin-timetable-event {
-  color: #1a0a00;
-}
-
-/* ── Pin footer ────────────────────────────────────────────────────────────── */
 
 .pin-footer {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(0,0,0,0.10);
-  font-size: 0.68rem;
-  color: rgba(0,0,0,0.45);
+  align-items: baseline;
+  padding: 4px 8px 6px;
+  gap: 4px;
 }
 
 .pin-from {
+  font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(0,0,0,0.55);
+  color: #5a4534;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .pin-expiry {
-  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: #8a7060;
   white-space: nowrap;
 }
 
 .pin-expiry--soon {
-  color: #C03A2B;
+  color: #c0392b;
   font-weight: 600;
 }
 
-/* ── FAB ───────────────────────────────────────────────────────────────────── */
+/* ── FAB ──────────────────────────────────────────────────────────────────── */
 
 .cork-fab {
   position: fixed;
-  bottom: calc(70px + var(--space-md));
+  bottom: max(24px, env(safe-area-inset-bottom, 24px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 8px;
   background: var(--color-terracotta);
-  color: white;
-  border-radius: 28px;
-  padding: 12px 22px;
-  font-size: 0.9rem;
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 14px 26px;
+  font-size: 1rem;
   font-weight: 600;
-  box-shadow: 0 4px 16px rgba(196, 112, 75, 0.5);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  transition: background 0.15s, transform 0.1s;
   z-index: 50;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-  white-space: nowrap;
-}
-
-.cork-fab:hover {
-  background: var(--color-terracotta-light);
-  box-shadow: 0 6px 22px rgba(196, 112, 75, 0.6);
-  transform: translateX(-50%) translateY(-2px);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .cork-fab:active {
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) scale(0.96);
 }
 
-/* ── Modal: type picker ────────────────────────────────────────────────────── */
+/* ── Modal ────────────────────────────────────────────────────────────────── */
 
-.type-picker {
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 200;
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
 }
 
-.type-btn {
+.modal-sheet {
+  background: var(--color-warm-white);
+  border-radius: 20px 20px 0 0;
+  padding: var(--space-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.modal-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 20px;
-  border: 1.5px solid var(--color-sand);
-  background: white;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  color: var(--color-dark-brown);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
   color: var(--color-warm-gray);
-  font-size: 0.82rem;
-  font-weight: 500;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+/* Photo picker */
+.photo-picker {
+  border: 2px dashed var(--color-sand);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-}
-
-.type-btn--active {
-  border-color: var(--color-terracotta);
-  background: var(--color-terracotta);
-  color: white;
-}
-
-/* ── Modal: color picker ───────────────────────────────────────────────────── */
-
-.color-picker {
+  overflow: hidden;
+  min-height: 140px;
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-sand);
+  transition: border-color 0.15s;
 }
 
-.color-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2.5px solid transparent;
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
-}
-
-.color-dot--selected {
+.photo-picker:hover {
   border-color: var(--color-terracotta);
-  transform: scale(1.2);
 }
 
-/* ── Modal: timetable rows ─────────────────────────────────────────────────── */
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-warm-gray);
+  padding: var(--space-lg);
+  text-align: center;
+  font-size: 0.9rem;
+}
 
-.timetable-rows {
+.photo-preview {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Form */
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.timetable-row-edit {
-  display: flex;
-  gap: 6px;
-  align-items: center;
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-dark-brown);
 }
 
-.tt-day   { flex: 2; min-width: 0; }
-.tt-time  { flex: 1; min-width: 0; }
-.tt-event { flex: 3; min-width: 0; }
-
-.tt-remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.07);
+.optional {
+  font-weight: 400;
   color: var(--color-warm-gray);
-  flex-shrink: 0;
-  transition: background 0.15s;
 }
 
-.tt-remove:hover {
-  background: var(--color-rose-light);
-  color: var(--color-rose);
+.form-group input {
+  border: 1px solid var(--color-sand);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #fff;
+  color: var(--color-dark-brown);
 }
 
-/* ── Buttons (shared with rest of app) ─────────────────────────────────────── */
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-terracotta);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
 
 .btn {
   padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-sm);
   font-weight: 500;
-  transition: background 0.2s, color 0.2s;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
 }
 
 .btn--primary {
@@ -504,40 +324,78 @@
   color: white;
 }
 
-.btn--primary:hover {
-  background: var(--color-terracotta-light);
-}
+.btn--primary:hover { opacity: 0.9; }
+.btn--primary:disabled,
+.btn--secondary:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn--secondary {
   background: var(--color-sand);
-  color: var(--color-dark-brown);
+  color: var(--color-brown);
 }
 
 .btn--secondary:hover {
-  background: #e8ddd3;
+  background: var(--color-warm-gray);
+  color: white;
 }
 
-.btn--small {
-  padding: 5px var(--space-md);
-  font-size: 0.82rem;
+.upload-error {
+  color: #c0392b;
+  font-size: 0.85rem;
 }
 
-.form-actions {
+/* Spinner animation */
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Setup screen ─────────────────────────────────────────────────────────── */
+
+.setup-screen {
   display: flex;
-  justify-content: flex-end;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  padding: var(--space-lg);
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.setup-card {
+  background: var(--color-warm-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+
+.setup-icon { font-size: 3rem; display: block; margin-bottom: var(--space-md); }
+
+.setup-card h2 {
+  color: var(--color-dark-brown);
+  margin-bottom: var(--space-sm);
+}
+
+.setup-card p {
+  color: var(--color-warm-gray);
+  font-size: 0.9rem;
   margin-bottom: var(--space-md);
 }
 
-.form-group label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-brown);
+.setup-card ol {
+  text-align: left;
+  color: var(--color-warm-gray);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  padding-left: var(--space-lg);
+}
+
+.setup-card code {
+  background: var(--color-sand);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.82em;
 }
