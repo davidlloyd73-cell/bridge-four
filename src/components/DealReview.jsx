@@ -160,8 +160,9 @@ export default function DealReview({
             {analysisLoading ? (
               <div className="analysis-loading">Analysing deal...</div>
             ) : (() => {
-              const bestMatch = analysisText.match(/BEST CONTRACT:\s*(.*?)(?:\n\n|ANALYSIS:)/s);
-              const analysisMatch = analysisText.match(/ANALYSIS:\s*([\s\S]*)/);
+              const cleanText = analysisText.replace(/\*+/g, '').trim();
+              const bestMatch = cleanText.match(/BEST CONTRACT:\s*(.*?)(?:\n\n|ANALYSIS:)/s);
+              const analysisMatch = cleanText.match(/ANALYSIS:\s*([\s\S]*)/);
               if (bestMatch) {
                 return (
                   <>
