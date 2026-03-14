@@ -1261,18 +1261,35 @@ body {
 }
 
 @media (max-width: 480px) {
-  .card { width: 58px; height: 82px; }
-  .card.small { width: 46px; height: 65px; }
-  .card-rank { font-size: 0.8rem; }
+  .card { width: 52px; height: 74px; }
+  .card.small { width: 42px; height: 60px; }
+  .card-rank { font-size: 0.75rem; }
   .card-suit { font-size: 0.6rem; }
-  .card-suit-large { font-size: 1.3rem; }
+  .card-suit-large { font-size: 1.2rem; }
 
-  .pos-bottom { bottom: 100px; }
-  .hand-bottom { bottom: 8px; }
-  .hand-bottom .hand-cards .card { margin-left: -16px; }
+  .pos-bottom { bottom: 90px; }
+  .hand-bottom { bottom: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .hand-bottom .hand-cards .card { margin-left: -14px; }
 
-  .bid-btn { width: 44px; height: 34px; font-size: 0.8rem; }
-  .bid-action { padding: 0.5rem 1rem; font-size: 0.9rem; }
+  /* Compact bidding box */
+  .bidding-box { padding: 0.5rem; }
+  .bidding-box h3 { font-size: 0.9rem; margin-bottom: 0.4rem; }
+  .bid-grid { gap: 2px; margin-bottom: 0.5rem; }
+  .bid-row { gap: 2px; }
+  .bid-btn { width: 44px; height: 28px; font-size: 0.75rem; }
+  .bid-level { font-size: 0.85rem; }
+  .bid-suit-sym { font-size: 0.9rem; }
+  .bid-action { padding: 0.35rem 0.8rem; font-size: 0.85rem; }
+  .bid-actions { gap: 0.4rem; }
+  .bidding-history { padding: 0.5rem; margin-bottom: 0.5rem; }
+  .bidding-history table { font-size: 0.85rem; }
+  .bidding-history th { padding: 0.25rem 0.4rem; font-size: 0.85rem; }
+  .bidding-history td { padding: 0.25rem 0.4rem; }
+
+  /* Compact player info */
+  .player-info { padding: 0.35rem 0.6rem; min-width: 80px; }
+  .player-name { font-size: 0.9rem; }
+  .player-seat { font-size: 0.7rem; }
 
   .score-sheet { min-width: unset; width: 95vw; }
 
@@ -1281,7 +1298,7 @@ body {
 
   .hand-left .hand-cards .card.small,
   .hand-right .hand-cards .card.small {
-    margin-top: -55px;
+    margin-top: -48px;
   }
 
   .deal-review { padding: 1rem; }
@@ -1292,8 +1309,9 @@ body {
   .top-bar { padding: 0.4rem 0.8rem; }
   .game-info { gap: 0.6rem; font-size: 0.85rem; flex-wrap: wrap; }
 
-  /* Prevent body scrolling so cards don't get clipped */
+  /* Account for mobile browser chrome and nav bar */
   body { overflow: hidden; height: 100vh; height: 100dvh; }
+  .table { padding-bottom: env(safe-area-inset-bottom, 0px); }
 }
 
 @media (max-width: 375px) {
