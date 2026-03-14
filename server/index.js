@@ -5,6 +5,7 @@ import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { createGame, addPlayer, removePlayer, allSeated, startDeal, processBid, playCard, getClientState, PHASES } from './game/game.js';
+import { calculateHCP } from './game/deck.js';
 import { chooseBid, chooseCard, getBotName } from './game/bot.js';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -55,7 +56,8 @@ function buildAnalysisPrompt(dealData) {
 
   prompt += `HANDS:\n`;
   for (const seat of ['N', 'E', 'S', 'W']) {
-    prompt += `${SEAT_NAMES[seat]}: ${formatHandForPrompt(originalHands[seat])}\n`;
+    const hcp = calculateHCP(originalHands[seat]);
+    prompt += `${SEAT_NAMES[seat]} (${hcp} HCP): ${formatHandForPrompt(originalHands[seat])}\n`;
   }
 
   prompt += `\nBIDDING (dealer ${SEAT_NAMES[biddingDealer]}):\n`;
@@ -84,10 +86,10 @@ function buildAnalysisPrompt(dealData) {
     prompt += `\nPassed out - no score\n`;
   }
 
-  prompt += `\nPlease respond in this format:\n\n`;
+  prompt += `\nPlease respond in this exact format (no markdown, no bold, no asterisks):\n\n`;
   prompt += `BEST CONTRACT: State the optimal contract given all four hands (e.g. "4♠ by North, making 10 tricks"). Consider which partnership has the combined strength, the best trump fit or NT stoppers, and how many tricks can reasonably be taken with best play.\n\n`;
-  prompt += `ANALYSIS: Then critique the actual bidding — was it reasonable? How does it compare to the optimal contract above? What would you have bid differently? Note key hand points (HCP, shape, fit) and any notable aspects of the deal.\n`;
-  prompt += `Keep the analysis section conversational and educational, about 150-200 words.`;
+  prompt += `ANALYSIS: Then critique the actual bidding — was it reasonable? How does it compare to the optimal contract above? What would you have bid differently? Use the exact HCP values shown above for each player (do not recalculate them). Note key hand points (shape, fit) and any notable aspects of the deal.\n`;
+  prompt += `Keep the analysis section conversational and educational, about 150-200 words. Plain text only, no markdown formatting.`;
 
   return prompt;
 }
