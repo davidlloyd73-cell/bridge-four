@@ -1296,9 +1296,45 @@ body {
   .hand-left { left: 80px; }
   .hand-right { right: 80px; }
 
+  .hand-left { left: 70px; }
+  .hand-right { right: 70px; }
+
   .hand-left .hand-cards .card.small,
   .hand-right .hand-cards .card.small {
     margin-top: -48px;
+  }
+
+  /* Force dummy hand cards smaller on mobile */
+  .dummy-hand .hand-cards .card {
+    width: 42px !important;
+    height: 60px !important;
+  }
+  .dummy-hand .hand-cards .card .card-rank { font-size: 0.7rem; }
+  .dummy-hand .hand-cards .card .card-suit { font-size: 0.55rem; }
+  .dummy-hand .hand-cards .card .card-suit-large { font-size: 1rem; }
+  .dummy-label { font-size: 0.7rem; margin-bottom: 2px; padding: 1px 5px; }
+
+  /* Aggressive vertical overlap for dummy on left/right */
+  .dummy-hand.hand-left .hand-cards .card,
+  .dummy-hand.hand-right .hand-cards .card {
+    margin-top: -48px !important;
+  }
+  .dummy-hand.hand-left .hand-cards .card:first-child,
+  .dummy-hand.hand-right .hand-cards .card:first-child {
+    margin-top: 0 !important;
+  }
+  /* Horizontal overlap for dummy on top */
+  .dummy-hand.hand-top .hand-cards .card {
+    margin-left: -28px !important;
+  }
+  .dummy-hand.hand-top .hand-cards .card:first-child {
+    margin-left: 0 !important;
+  }
+
+  /* Vertical full-size cards at side positions (non-dummy) */
+  .hand-left .hand-cards .card:not(.small),
+  .hand-right .hand-cards .card:not(.small) {
+    margin-top: -55px;
   }
 
   .deal-review { padding: 1rem; }
