@@ -1142,6 +1142,17 @@ body {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
 }
+.analysis-best-contract {
+  color: var(--gold);
+  font-weight: bold;
+  font-size: 1.05rem;
+  margin-bottom: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  background: rgba(212,168,67,0.1);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  line-height: 1.5;
+}
 .analysis-text {
   color: #ddd;
   line-height: 1.6;
@@ -1257,4 +1268,136 @@ body {
 
   .pos-bottom { bottom: 110px; }
   .hand-bottom .hand-cards .card { margin-left: -16px; }
+
+  .bid-btn { width: 44px; height: 34px; font-size: 0.8rem; }
+  .bid-action { padding: 0.5rem 1rem; font-size: 0.9rem; }
+
+  .score-sheet { min-width: unset; width: 95vw; }
+
+  .hand-left { left: 80px; }
+  .hand-right { right: 80px; }
+
+  .hand-left .hand-cards .card.small,
+  .hand-right .hand-cards .card.small {
+    margin-top: -55px;
+  }
+
+  .deal-review { padding: 1rem; }
+  .review-content { flex-direction: column; }
+  .review-hand { min-width: unset; }
+  .review-bidding-section { min-width: unset; }
+
+  .top-bar { padding: 0.4rem 0.8rem; }
+  .game-info { gap: 0.6rem; font-size: 0.85rem; flex-wrap: wrap; }
+}
+
+@media (max-width: 375px) {
+  /* Cards */
+  .card { width: 48px; height: 68px; border-radius: 6px; }
+  .card.small { width: 38px; height: 54px; border-radius: 5px; }
+  .card-rank { font-size: 0.7rem; }
+  .card-suit { font-size: 0.55rem; }
+  .card-suit-large { font-size: 1rem; }
+  .card.small .card-rank { font-size: 0.65rem; }
+  .card.small .card-suit { font-size: 0.5rem; }
+  .card.small .card-suit-large { font-size: 0.9rem; }
+
+  /* Bottom hand overlap */
+  .hand-bottom .hand-cards .card { margin-left: -12px; }
+
+  /* Player positions */
+  .pos-bottom { bottom: 85px; }
+  .pos-top { top: 4px; }
+  .pos-left { left: 2px; }
+  .pos-right { right: 2px; }
+
+  /* Player info */
+  .player-info { padding: 0.3rem 0.5rem; min-width: 70px; border-radius: 6px; }
+  .player-name { font-size: 0.8rem; }
+  .player-seat { font-size: 0.65rem; }
+  .dealer-badge { font-size: 0.6rem; padding: 0.1rem 0.3rem; }
+  .hcp-badge { font-size: 0.65rem; padding: 0.1rem 0.3rem; }
+
+  /* Hand offsets */
+  .hand-left { left: 55px; }
+  .hand-right { right: 55px; }
+  .hand-top { top: 65px; }
+
+  /* Side card overlap */
+  .hand-left .hand-cards .card.small,
+  .hand-right .hand-cards .card.small {
+    margin-top: -42px;
+  }
+  .hand-top .hand-cards .card.small {
+    margin-left: -28px;
+  }
+
+  /* Full-size cards at non-bottom positions */
+  .hand-top .hand-cards .card:not(.small) { margin-left: -30px; }
+  .hand-left .hand-cards .card:not(.small),
+  .hand-right .hand-cards .card:not(.small) {
+    margin-left: 0;
+    margin-top: -50px;
+  }
+
+  /* Center area */
+  .center-area { width: 95vw; }
+
+  /* Bidding box */
+  .bidding-box { padding: 0.6rem; }
+  .bid-btn { width: 40px; height: 30px; font-size: 0.75rem; }
+  .bid-level { font-size: 0.8rem; }
+  .bid-suit-sym { font-size: 0.85rem; }
+  .bid-action { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+  .bidding-history th { font-size: 0.85rem; padding: 0.3rem; }
+  .bidding-history td { padding: 0.3rem; font-size: 0.85rem; }
+
+  /* Trick positions */
+  .trick-pos-bottom { bottom: 14%; }
+  .trick-pos-top { top: 10%; }
+  .trick-pos-left { left: 8%; }
+  .trick-pos-right { right: 8%; }
+  .trick-info { padding: 0.3rem 0.6rem; }
+  .contract-text { font-size: 1.1rem; }
+  .trick-count { font-size: 0.8rem; gap: 0.8rem; }
+
+  /* Score sheet */
+  .score-sheet { min-width: unset; width: 95vw; padding: 0.8rem; }
+  .score-table { font-size: 0.7rem; }
+  .score-table th { padding: 0.3rem 0.2rem; }
+  .score-table td { padding: 0.25rem 0.2rem; }
+
+  /* Deal review */
+  .deal-review { padding: 0.8rem; max-width: 100vw; }
+  .deal-review h2 { font-size: 1.2rem; }
+  .review-content { flex-direction: column; gap: 0.8rem; }
+  .review-hand { min-width: unset; padding: 0.4rem 0.6rem; }
+  .review-seat-name { font-size: 0.85rem; }
+  .review-suit-row { font-size: 0.85rem; }
+  .review-suit-symbol { font-size: 0.95rem; }
+  .review-suit-cards { font-size: 0.8rem; }
+  .review-bidding-section { min-width: unset; }
+  .compass-center-spacer { width: 20px; }
+  .review-result { padding: 0.5rem; }
+  .review-contract { font-size: 1rem; }
+  .review-actions { gap: 0.5rem; }
+  .review-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
+
+  /* Top bar */
+  .top-bar { padding: 0.4rem 0.6rem; }
+  .game-info { gap: 0.4rem; font-size: 0.75rem; flex-wrap: wrap; }
+  .score-btn { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+  /* Lobby */
+  .lobby { padding: 1.5rem; }
+  .lobby h1 { font-size: 1.5rem; }
+
+  /* Analysis */
+  .analysis-best-contract { font-size: 0.9rem; padding: 0.4rem 0.6rem; }
+  .analysis-text { font-size: 0.85rem; }
+
+  /* Status indicators */
+  .status-your-turn { padding: 0.5rem 1rem; font-size: 1rem; }
+  .status-dummy { padding: 0.5rem 1rem; font-size: 1rem; }
+  .waiting-bid { font-size: 0.9rem; }
 }

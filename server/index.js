@@ -84,11 +84,10 @@ function buildAnalysisPrompt(dealData) {
     prompt += `\nPassed out - no score\n`;
   }
 
-  prompt += `\nPlease analyse:\n`;
-  prompt += `1. The bidding - was it reasonable? What would you have bid differently?\n`;
-  prompt += `2. Key points about the hands (HCP distribution, shape, fit)\n`;
-  prompt += `3. Any notable aspects of the deal\n`;
-  prompt += `Keep it conversational and educational, about 150-200 words.`;
+  prompt += `\nPlease respond in this format:\n\n`;
+  prompt += `BEST CONTRACT: State the optimal contract given all four hands (e.g. "4♠ by North, making 10 tricks"). Consider which partnership has the combined strength, the best trump fit or NT stoppers, and how many tricks can reasonably be taken with best play.\n\n`;
+  prompt += `ANALYSIS: Then critique the actual bidding — was it reasonable? How does it compare to the optimal contract above? What would you have bid differently? Note key hand points (HCP, shape, fit) and any notable aspects of the deal.\n`;
+  prompt += `Keep the analysis section conversational and educational, about 150-200 words.`;
 
   return prompt;
 }
@@ -107,7 +106,7 @@ app.post('/api/analyse', async (req, res) => {
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1024,
+      max_tokens: 1280,
       messages: [{ role: 'user', content: prompt }],
     });
 

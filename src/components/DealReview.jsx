@@ -159,9 +159,19 @@ export default function DealReview({
             <h3>Claude's Analysis</h3>
             {analysisLoading ? (
               <div className="analysis-loading">Analysing deal...</div>
-            ) : (
-              <div className="analysis-text">{analysisText}</div>
-            )}
+            ) : (() => {
+              const bestMatch = analysisText.match(/BEST CONTRACT:\s*(.*?)(?:\n\n|ANALYSIS:)/s);
+              const analysisMatch = analysisText.match(/ANALYSIS:\s*([\s\S]*)/);
+              if (bestMatch) {
+                return (
+                  <>
+                    <div className="analysis-best-contract">{bestMatch[1].trim()}</div>
+                    <div className="analysis-text">{analysisMatch ? analysisMatch[1].trim() : ''}</div>
+                  </>
+                );
+              }
+              return <div className="analysis-text">{analysisText}</div>;
+            })()}
           </div>
         )}
 
