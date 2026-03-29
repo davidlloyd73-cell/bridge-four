@@ -29,8 +29,83 @@ app.use((req, res, next) => {
 });
 
 // Claude analysis helper
-const SUIT_NAMES = { S: 'Spades', H: 'Hearts', D: 'Diamonds', C: 'Clubs', NT: 'No Trump' };
+const SUIT_NAMES = { S: 'Spades', H: 'Hearts', D: 'Diamonds', C: 'Clubs', NT: 'No Trumps' };
 const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
+
+// ── Google Sheets webhook ──────────────────────────────────────────────────
+// Posts one row per human player to the sheet after every completed hand.
+// Set SHEETS_WEBHOOK_URL (and optionally BRIDGE_SECRET) as Render env vars.
+async function postScoreToSheets(game, scoreEntry) {
+  const webhookUrl = process.env.SHEETS_WEBHOOK_URL;
+  if (!webhookUrl || scoreEntry.isReplay) return; // skip replays & unconfigured
+
+  try {
+    const now    = new Date();
+    const pad    = n => String(n).padStart(2, '0');
+    const timestamp = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} `
+                    + `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const date   = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+
+    const contract     = scoreEntry.contract;
+    const declarerSeat = contract?.declarer;
+    const declaringTeam = declarerSeat === 'N' || declarerSeat === 'S' ? 'NS' : 'EW';
+    const declarerName = game.players[declarerSeat]?.name || declarerSeat || 'Unknown';
+    const doubled      = contract?.redoubled ? 'Redoubled' : contract?.doubled ? 'Doubled' : 'No';
+    const suit         = SUIT_NAMES[contract?.suit] || contract?.suit || '—';
+    const tricksContracted = contract ? 6 + contract.level : 0;
+    const tricksMade   = scoreEntry.tricksMade || 0;
+
+    // Build one row for every human player in the game
+    const rows = [];
+    for (const seat of ['N', 'E', 'S', 'W']) {
+      const player = game.players[seat];
+      if (!player || player.isBot) continue;
+
+      const playerTeam  = seat === 'N' || seat === 'S' ? 'NS' : 'EW';
+      const wonAuction  = contract ? (playerTeam === declaringTeam ? 'Yes' : 'No') : 'No';
+      const pointsScored = scoreEntry.score?.[playerTeam] || 0;
+      const hcp          = game.hcp?.[seat] ?? scoreEntry.originalHands
+        ? (game.hcp?.[seat] ?? 0) : 0;
+
+      rows.push({
+        timestamp,
+        date,
+        handNumber: scoreEntry.dealNumber + 1,  // 1-based for readability
+        player:     player.name,
+        hcp,
+        wonAuction,
+        declarer:   declarerName,
+        tricksContracted,
+        suit,
+        tricksMade,
+        doubled,
+        pointsScored,
+      });
+    }
+
+    if (rows.length === 0) return; // all bots, nothing to record
+
+    const body = JSON.stringify({
+      secret: process.env.BRIDGE_SECRET || '',
+      rows,
+    });
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    });
+
+    const result = await response.json();
+    if (result.error) {
+      console.error('Sheets webhook error:', result.error);
+    } else {
+      console.log(`Sheets: posted ${result.rowsAdded} row(s) for hand ${scoreEntry.dealNumber + 1}`);
+    }
+  } catch (err) {
+    console.error('Failed to post to Google Sheets:', err.message);
+  }
+}
 
 function formatHandForPrompt(cards) {
   const suits = { S: [], H: [], C: [], D: [] };
@@ -208,6 +283,7 @@ function scheduleBotAction(game) {
         if (result.handComplete) {
           const lastScore = game.scores[game.scores.length - 1];
           console.log(`Hand complete - NS: ${lastScore.score.NS}, EW: ${lastScore.score.EW}`);
+          postScoreToSheets(game, lastScore);
           scheduleBotAdvance(game);
         } else {
           scheduleBotAction(game);
@@ -320,6 +396,7 @@ io.on('connection', (socket) => {
     if (result.handComplete) {
       const lastScore = currentGame.scores[currentGame.scores.length - 1];
       console.log(`Hand complete - NS: ${lastScore.score.NS}, EW: ${lastScore.score.EW}`);
+      postScoreToSheets(currentGame, lastScore);
     }
 
     // Trigger bot action if next player is a bot
