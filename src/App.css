@@ -310,7 +310,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 3;
-  width: 500px;
+  width: 620px;
   max-width: 90vw;
 }
 
@@ -616,7 +616,7 @@ body {
   transform: translateX(-50%);
 }
 .hand-top {
-  top: 90px;
+  top: 120px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -1376,38 +1376,33 @@ body {
 .last-trick-close:hover { background: #3a3a50; }
 
 /* ========== Bidding phase mobile layout ========== */
-/* During bidding the E/W panels sit at top-50% which collides with the bid grid.
-   Move them to the top corners and hide South to free the bid actions row. */
 @media (max-width: 768px) {
-  /* E/W panels → top corners */
+  /* E/W panels → top corners, South hidden (would cover Pass/Double buttons) */
   .phase-bidding .pos-left  { top: 68px; transform: none; }
   .phase-bidding .pos-right { top: 68px; transform: none; }
-  /* South panel overlaps Pass/Double/Redouble — hide it during bidding */
   .phase-bidding .pos-bottom { display: none; }
-  /* Anchor center-area ABOVE the hand cards (hand-bottom ~85px tall) */
+
+  /* Bidding history not needed on mobile — hides a ~80px table saving critical space */
+  .phase-bidding .bidding-history { display: none; }
+
+  /* Float the bid panel above the player's hand (hand-bottom is ~85px tall) */
   .phase-bidding .center-area {
     top: auto;
-    bottom: 90px;
+    bottom: 88px;
     transform: translateX(-50%);
-    max-height: calc(100dvh - 240px);
+    max-height: calc(100dvh - 230px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     background: rgba(10,30,10,0.97);
-    border-radius: 14px;
+    border-radius: 14px 14px 0 0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
   }
-  /* Compact bidding box buttons so 7 rows fit in the available height */
-  .phase-bidding .bidding-box { padding: 0.4rem 0.5rem; }
-  .phase-bidding .bidding-box h3 { font-size: 0.85rem; margin-bottom: 0.25rem; }
+  /* Compact layout — don't override button sizes (let 480px/375px breakpoints do that) */
+  .phase-bidding .bidding-box { padding: 0.5rem; }
+  .phase-bidding .bidding-box h3 { font-size: 0.9rem; margin-bottom: 0.3rem; }
   .phase-bidding .bid-grid { gap: 3px; margin-bottom: 0.4rem; }
-  .phase-bidding .bid-row { gap: 3px; }
-  .phase-bidding .bid-btn { width: 52px; height: 34px; font-size: 0.82rem; }
-  .phase-bidding .bid-actions { gap: 0.35rem; }
-  .phase-bidding .bid-action { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
-  /* Collapse bidding history on mobile to save vertical space */
-  .phase-bidding .bidding-history { max-height: 60px; overflow-y: auto; margin-bottom: 0.3rem; font-size: 0.75rem; }
-  .phase-bidding .bidding-history th,
-  .phase-bidding .bidding-history td { padding: 0.15rem 0.3rem; font-size: 0.75rem; }
+  .phase-bidding .bid-row  { gap: 3px; }
+  .phase-bidding .bid-actions { gap: 0.4rem; }
 }
 
 /* ========== Responsive ========== */
