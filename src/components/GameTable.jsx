@@ -35,14 +35,21 @@ function playCardSound() {
   } catch (_) {}
 }
 const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣', NT: 'NT' };
+const SUIT_COLORS  = { S: 'black', H: 'red', D: 'red', C: 'black' };
 
 export default function GameTable({
   gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, onReplayHand, error
 }) {
   const [showScores, setShowScores] = useState(false);
+  const [showLastTrick, setShowLastTrick] = useState(false);
   const [analysisText, setAnalysisText] = useState(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const prevTrickLen = useRef(0);
+  // Persist the last completed trick so players can recall it after it clears
+  const savedLastTrick = useRef(null);
+  if (gameState?.lastCompletedTrick) {
+    savedLastTrick.current = gameState.lastCompletedTrick;
+  }
 
   // Play a card-snap sound whenever ANY player plays a card
   useEffect(() => {
@@ -119,6 +126,12 @@ export default function GameTable({
           </span>
         </div>
         <div className="top-actions">
+          {savedLastTrick.current && phase === 'playing' && (
+            <button className="last-trick-btn" onClick={() => setShowLastTrick(true)}
+              title="View the last completed trick">
+              &#9654; Last Trick
+            </button>
+          )}
           <button className="score-btn" onClick={() => setShowScores(true)}>
             Scores ({gameState.totalScores?.NS || 0} - {gameState.totalScores?.EW || 0})
           </button>
@@ -371,6 +384,47 @@ export default function GameTable({
             }
           }}
         />
+      )}
+
+      {/* Last trick overlay */}
+      {showLastTrick && savedLastTrick.current && (
+        <div className="last-trick-overlay" onClick={() => setShowLastTrick(false)}>
+          <div className="last-trick-modal" onClick={e => e.stopPropagation()}>
+            <h3>Last Trick
+              {savedLastTrick.current.winner && (
+                <span className="trick-winner-label">
+                  — won by {gameState?.players?.[savedLastTrick.current.winner]?.name || savedLastTrick.current.winner}
+                </span>
+              )}
+            </h3>
+            <div className="last-trick-compass">
+              {['N','E','S','W'].map(seat => {
+                const entry = savedLastTrick.current.cards?.find(c => c.seat === seat);
+                const isWinner = savedLastTrick.current.winner === seat;
+                const pos = FIXED_POSITIONS[seat];
+                return (
+                  <div key={seat} className={`last-trick-pos last-trick-${pos} ${isWinner ? 'trick-winner' : ''}`}>
+                    <div className="last-trick-seat-name">{gameState?.players?.[seat]?.name || seat}</div>
+                    {entry ? (
+                      <div className={`card last-trick-card ${SUIT_COLORS[entry.card.suit]}`}>
+                        <div className="card-corner top-left">
+                          <span className="card-rank">{entry.card.rank}</span>
+                          <span className="card-suit">{SUIT_SYMBOLS[entry.card.suit]}</span>
+                        </div>
+                        <div className="card-center">
+                          <span className="card-suit-large">{SUIT_SYMBOLS[entry.card.suit]}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="last-trick-empty">—</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <button className="last-trick-close" onClick={() => setShowLastTrick(false)}>Close</button>
+          </div>
+        </div>
       )}
 
       {/* Analysis is shown inline in DealReview */}

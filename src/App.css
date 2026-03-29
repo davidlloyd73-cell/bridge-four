@@ -1264,6 +1264,117 @@ body {
   text-transform: uppercase;
 }
 
+/* ========== Last Trick overlay ========== */
+.last-trick-btn {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  background: rgba(212,168,67,0.15);
+  color: var(--gold);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.last-trick-btn:hover { background: rgba(212,168,67,0.3); }
+
+.last-trick-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.last-trick-modal {
+  background: #1a1a2e;
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  min-width: 300px;
+  max-width: 95vw;
+  text-align: center;
+}
+
+.last-trick-modal h3 {
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+  font-size: 1.1rem;
+}
+
+.trick-winner-label {
+  color: #aaa;
+  font-size: 0.85rem;
+  font-weight: normal;
+  margin-left: 0.4rem;
+}
+
+.last-trick-compass {
+  display: grid;
+  grid-template-areas:
+    ". north ."
+    "west center east"
+    ". south .";
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.last-trick-top    { grid-area: north; }
+.last-trick-bottom { grid-area: south; }
+.last-trick-left   { grid-area: west; }
+.last-trick-right  { grid-area: east; }
+
+.last-trick-pos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.last-trick-seat-name {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+/* Cards in the last trick modal use existing .card styles but smaller */
+.last-trick-card {
+  width: 60px !important;
+  height: 84px !important;
+  cursor: default !important;
+  transform: none !important;
+}
+
+.trick-winner .last-trick-card,
+.last-trick-pos.trick-winner .last-trick-card {
+  box-shadow: 0 0 12px rgba(241,196,15,0.8), 0 0 0 2px var(--active) !important;
+  border: 2px solid var(--active) !important;
+}
+
+.last-trick-empty {
+  width: 60px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 1.5rem;
+}
+
+.last-trick-close {
+  padding: 0.5rem 1.5rem;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background: #2c2c3e;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+.last-trick-close:hover { background: #3a3a50; }
+
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .card { width: 70px; height: 100px; }
