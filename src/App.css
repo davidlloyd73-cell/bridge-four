@@ -1375,6 +1375,33 @@ body {
 }
 .last-trick-close:hover { background: #3a3a50; }
 
+/* ========== Bidding phase mobile layout ========== */
+/* During bidding the E/W panels sit at top-50% which collides with the bid grid.
+   Move them to the top corners and hide South to free the bid actions row. */
+@media (max-width: 768px) {
+  /* E/W panels → top corners */
+  .phase-bidding .pos-left  { top: 68px; transform: none; }
+  .phase-bidding .pos-right { top: 68px; transform: none; }
+  /* South panel overlaps Pass/Double/Redouble — hide it during bidding */
+  .phase-bidding .pos-bottom { display: none; }
+  /* Make the bidding area scrollable so all 7 levels are reachable */
+  .bidding-area {
+    max-height: calc(100dvh - 140px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Anchor center-area to bottom of screen during bidding so it doesn't
+     float over the N player panel */
+  .phase-bidding .center-area {
+    top: auto;
+    bottom: 0;
+    transform: translateX(-50%);
+    max-height: calc(100dvh - 130px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .card { width: 70px; height: 100px; }

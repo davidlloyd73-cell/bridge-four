@@ -139,7 +139,7 @@ export default function GameTable({
       </div>
 
       {/* Game table */}
-      <div className="table">
+      <div className={`table phase-${phase}`}>
         {/* Player positions — fixed compass: N top, E right, S bottom, W left */}
         {['N', 'E', 'S', 'W'].map((seat) => {
           const pos = FIXED_POSITIONS[seat];
