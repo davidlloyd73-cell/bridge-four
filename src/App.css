@@ -1240,6 +1240,30 @@ body {
   background: #9b59b6;
 }
 
+.review-btn.replay-btn {
+  background: #2c3e50;
+  color: #d4a843;
+  border: 1px solid #4a6278;
+}
+.review-btn.replay-btn:hover {
+  background: #34495e;
+}
+
+.replay-badge {
+  display: inline-block;
+  background: #2c3e50;
+  color: #d4a843;
+  font-size: 0.65rem;
+  font-weight: normal;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #4a6278;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
   .card { width: 70px; height: 100px; }
@@ -1460,4 +1484,56 @@ body {
   .status-your-turn { padding: 0.5rem 1rem; font-size: 1rem; }
   .status-dummy { padding: 0.5rem 1rem; font-size: 1rem; }
   .waiting-bid { font-size: 0.9rem; }
+}
+
+/* ========== Mobile touch improvements ========== */
+@media (max-width: 768px) and (pointer: coarse) {
+  /* Bigger tap targets for playable cards */
+  .card.clickable {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  /* Raise playable cards slightly so they're visually distinct and easier to tap */
+  .card.playable {
+    transform: translateY(-8px);
+    transition: transform 0.15s ease;
+  }
+
+  /* Bid buttons — generous tap area on phones */
+  .bid-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Review action buttons — full width on small screens */
+  .review-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .review-btn {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+
+  /* Lobby form easier to use on phone */
+  .form-group input {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+    padding: 0.9rem 1rem;
+  }
+  .seat-btn {
+    padding: 0.9rem;
+    font-size: 1rem;
+  }
+  .join-btn {
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+
+  /* Score button in top bar — bigger tap area */
+  .score-btn {
+    padding: 0.45rem 0.8rem;
+    min-height: 36px;
+  }
 }

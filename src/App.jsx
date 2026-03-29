@@ -112,6 +112,12 @@ export default function App() {
     });
   }, []);
 
+  const replayHandAction = useCallback(() => {
+    socket.emit('replay-hand', null, (response) => {
+      if (response?.error) setError(response.error);
+    });
+  }, []);
+
   if (!connected) {
     return (
       <div className="app connecting">
@@ -139,6 +145,7 @@ export default function App() {
         onNextDeal={nextDeal}
         onNewRound={newRound}
         onAddBots={addBots}
+        onReplayHand={replayHandAction}
         error={error}
       />
     </ErrorBoundary>

@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { createGame, addPlayer, removePlayer, allSeated, startDeal, processBid, playCard, getClientState, PHASES } from './game/game.js';
+import { createGame, addPlayer, removePlayer, allSeated, startDeal, processBid, playCard, replayHand, getClientState, PHASES } from './game/game.js';
 import { calculateHCP } from './game/deck.js';
 import { chooseBid, chooseCard, getBotName } from './game/bot.js';
 import Anthropic from '@anthropic-ai/sdk';
@@ -93,6 +93,9 @@ function buildAnalysisPrompt(dealData) {
 
   return prompt;
 }
+
+// Keep-alive endpoint — prevents Render free tier from spinning down
+app.get('/api/ping', (req, res) => res.json({ ok: true, ts: Date.now() }));
 
 app.post('/api/analyse', async (req, res) => {
   try {
@@ -330,12 +333,35 @@ io.on('connection', (socket) => {
       return;
     }
 
+    // If the last score was a practice replay, remove it before advancing
+    const lastScore = currentGame.scores[currentGame.scores.length - 1];
+    if (lastScore?.isReplay) {
+      currentGame.scores.pop();
+    }
+
     startDeal(currentGame);
     callback?.({ success: true });
     broadcastGameState(currentGame);
     console.log(`Starting deal ${currentGame.dealNumber + 1}`);
 
     // Kick off bot actions
+    scheduleBotAction(currentGame);
+  });
+
+  socket.on('replay-hand', (_, callback) => {
+    if (!currentGame) { callback?.({ error: 'Not in a game' }); return; }
+    if (currentGame.phase !== PHASES.HAND_COMPLETE && currentGame.phase !== PHASES.ROUND_COMPLETE) {
+      callback?.({ error: 'Hand not complete' });
+      return;
+    }
+
+    const result = replayHand(currentGame);
+    if (result.error) { callback?.({ error: result.error }); return; }
+
+    callback?.({ success: true });
+    broadcastGameState(currentGame);
+    console.log(`Replaying hand ${currentGame.dealNumber} (practice — no score)`);
+
     scheduleBotAction(currentGame);
   });
 

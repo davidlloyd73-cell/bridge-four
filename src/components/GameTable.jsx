@@ -10,7 +10,7 @@ const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
 const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣', NT: 'NT' };
 
 export default function GameTable({
-  gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, error
+  gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, onReplayHand, error
 }) {
   const [showScores, setShowScores] = useState(false);
   const [analysisText, setAnalysisText] = useState(null);
@@ -312,6 +312,7 @@ export default function GameTable({
           players={gameState.players}
           onNextDeal={() => { setAnalysisText(null); onNextDeal(); }}
           onNewRound={() => { setAnalysisText(null); onNewRound(); }}
+          onReplayHand={() => { setAnalysisText(null); onReplayHand(); }}
           analysisLoading={analysisLoading}
           analysisText={analysisText}
           onAnalyse={async () => {

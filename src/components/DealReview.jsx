@@ -58,12 +58,14 @@ export default function DealReview({
   players,
   onNextDeal,
   onNewRound,
+  onReplayHand,
   onAnalyse,
   analysisLoading,
   analysisText,
 }) {
   if (!reviewHands) return null;
 
+  const isReplay = lastScore?.isReplay === true;
   const contract = lastScore?.contract;
   const needed = contract ? 6 + contract.level : 0;
   const made = lastScore?.tricksMade || 0;
@@ -73,7 +75,7 @@ export default function DealReview({
   return (
     <div className="deal-review-overlay">
       <div className="deal-review">
-        <h2>Deal Review</h2>
+        <h2>Deal Review {isReplay && <span className="replay-badge">Practice Replay</span>}</h2>
 
         {/* Result summary */}
         <div className="review-result">
@@ -207,6 +209,13 @@ export default function DealReview({
             disabled={analysisLoading}
           >
             {analysisLoading ? 'Analysing...' : analysisText ? 'Re-analyse' : 'Analyse with Claude'}
+          </button>
+          <button
+            className="review-btn replay-btn"
+            onClick={onReplayHand}
+            title="Replay this hand without affecting the score"
+          >
+            ↩ Replay Hand
           </button>
           {isRoundComplete ? (
             <>
