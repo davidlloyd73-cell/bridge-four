@@ -52,7 +52,7 @@ async function postScoreToSheets(game, scoreEntry) {
     const declarerName = game.players[declarerSeat]?.name || declarerSeat || 'Unknown';
     const doubled      = contract?.redoubled ? 'Redoubled' : contract?.doubled ? 'Doubled' : 'No';
     const suit         = SUIT_NAMES[contract?.suit] || contract?.suit || '—';
-    const tricksContracted = contract ? 6 + contract.level : 0;
+    const tricksContracted = contract ? contract.level : 0;
     const tricksMade   = scoreEntry.tricksMade || 0;
 
     // Build one row for every human player in the game
