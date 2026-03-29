@@ -1,4 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+
+// Fixed compass: N always top, E always right, S always bottom, W always left
+const FIXED_POSITIONS = { N: 'top', E: 'right', S: 'bottom', W: 'left' };
 import Hand from './Hand';
 import Card from './Card';
 import BiddingBox, { BiddingHistory } from './BiddingBox';
@@ -7,6 +10,30 @@ import ScoreSheet from './ScoreSheet';
 import DealReview from './DealReview';
 
 const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
+
+function playCardSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = Math.floor(ctx.sampleRate * 0.06);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 4);
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200;
+    filter.Q.value = 0.8;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(1.0, ctx.currentTime);
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    source.start();
+  } catch (_) {}
+}
 const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣', NT: 'NT' };
 
 export default function GameTable({
@@ -15,6 +42,17 @@ export default function GameTable({
   const [showScores, setShowScores] = useState(false);
   const [analysisText, setAnalysisText] = useState(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
+  const prevTrickLen = useRef(0);
+
+  // Play a card-snap sound whenever ANY player plays a card
+  useEffect(() => {
+    const trick = gameState?.currentTrick;
+    if (!trick) return;
+    if (trick.length > prevTrickLen.current) {
+      playCardSound();
+    }
+    prevTrickLen.current = trick.length;
+  }, [gameState?.currentTrick]);
 
   const phase = gameState?.phase;
 
@@ -65,8 +103,6 @@ export default function GameTable({
   }
 
   const { players, vulnerability, dealer, dealNumber } = gameState;
-  const positions = ['bottom', 'right', 'top', 'left'];
-  const seatsInOrder = [mySeat, ...getOtherSeats(mySeat)];
 
   return (
     <div className="app game-screen">
@@ -91,15 +127,14 @@ export default function GameTable({
 
       {/* Game table */}
       <div className="table">
-        {/* Player positions */}
-        {seatsInOrder.map((seat, idx) => {
-          const pos = positions[idx];
+        {/* Player positions — fixed compass: N top, E right, S bottom, W left */}
+        {['N', 'E', 'S', 'W'].map((seat) => {
+          const pos = FIXED_POSITIONS[seat];
           const player = players[seat];
           const isDealer = seat === dealer;
           const isCurrentTurn = seat === gameState.currentTurn;
-          const myTeam = getTeam(mySeat);
           const seatTeam = getTeam(seat);
-          const isPartner = seat !== mySeat && seatTeam === myTeam;
+          const isPartner = seat !== mySeat && getTeam(seat) === getTeam(mySeat);
 
           return (
             <div key={seat} className={`player-position pos-${pos}`}>
@@ -241,31 +276,32 @@ export default function GameTable({
           />
         )}
 
-        {/* My hand (bottom) */}
-        {/* When humanPlaysBoth: show my hand at bottom even though I'm dummy */}
+        {/* My hand — at my fixed compass position, always full-size */}
         {gameState.myHand && gameState.myHand.length > 0 && (humanPlaysBoth || gameState.dummySeat !== mySeat) && (
           <Hand
             cards={gameState.myHand}
             onPlayCard={onPlayCard}
             isMyTurn={(gameState.currentTurn === mySeat && phase === 'playing') || false}
             playableCards={playableCards}
-            position="bottom"
+            position={FIXED_POSITIONS[mySeat]}
             isDummy={humanPlaysBoth}
+            large
           />
         )}
 
-        {/* Declarer's hand (shown when human plays both - at top/partner position) */}
+        {/* Declarer's hand (shown when human plays both) */}
         {humanPlaysBoth && gameState.declarerHand && gameState.declarerSeat && (
           <Hand
             cards={gameState.declarerHand}
             onPlayCard={onPlayCard}
             isMyTurn={gameState.currentTurn === gameState.declarerSeat && phase === 'playing'}
             playableCards={declarerPlayableCards}
-            position={getSeatPosition(gameState.declarerSeat, mySeat)}
+            position={FIXED_POSITIONS[gameState.declarerSeat]}
+            large
           />
         )}
 
-        {/* Dummy hand (shown when revealed - visible to all players, but NOT when humanPlaysBoth) */}
+        {/* Dummy hand (shown when revealed) */}
         {!humanPlaysBoth && gameState.dummyHand && gameState.dummySeat && (
           <Hand
             cards={gameState.dummyHand}
@@ -278,7 +314,7 @@ export default function GameTable({
               gameState.contract?.declarer === mySeat && gameState.declarerControlsDummy
             }
             playableCards={dummyPlayableCards}
-            position={gameState.dummySeat === mySeat ? 'bottom' : getSeatPosition(gameState.dummySeat, mySeat)}
+            position={FIXED_POSITIONS[gameState.dummySeat]}
             isDummy
           />
         )}
@@ -343,27 +379,6 @@ export default function GameTable({
 }
 
 // Helper functions
-
-function getSeatPositions(mySeat) {
-  const order = { N: 0, E: 1, S: 2, W: 3 };
-  const myIdx = order[mySeat];
-  const positions = {};
-  const posNames = ['bottom', 'right', 'top', 'left'];
-  for (const [seat, idx] of Object.entries(order)) {
-    positions[seat] = posNames[(idx - myIdx + 4) % 4];
-  }
-  return positions;
-}
-
-function getSeatPosition(seat, mySeat) {
-  return getSeatPositions(mySeat)[seat];
-}
-
-function getOtherSeats(mySeat) {
-  const all = ['N', 'E', 'S', 'W'];
-  const myIdx = all.indexOf(mySeat);
-  return [all[(myIdx + 1) % 4], all[(myIdx + 2) % 4], all[(myIdx + 3) % 4]];
-}
 
 function getTeam(seat) {
   return (seat === 'N' || seat === 'S') ? 'NS' : 'EW';

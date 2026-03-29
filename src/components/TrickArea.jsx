@@ -45,7 +45,7 @@ export default function TrickArea({ currentTrick, lastCompletedTrick, mySeat, co
     };
   }, [currentTrick, lastCompletedTrick]);
 
-  const seatToPosition = getSeatPositions(mySeat);
+  const seatToPosition = FIXED_POSITIONS;
 
   return (
     <div className="trick-area-overlay">
@@ -84,16 +84,8 @@ export default function TrickArea({ currentTrick, lastCompletedTrick, mySeat, co
   );
 }
 
-function getSeatPositions(mySeat) {
-  const order = ['S', 'W', 'N', 'E'];
-  const positions = ['bottom', 'left', 'top', 'right'];
-  const myIdx = order.indexOf(mySeat);
-  const map = {};
-  for (let i = 0; i < 4; i++) {
-    map[order[(myIdx + i) % 4]] = positions[i];
-  }
-  return map;
-}
+// Fixed compass: N always top, E always right, S always bottom, W always left
+const FIXED_POSITIONS = { N: 'top', E: 'right', S: 'bottom', W: 'left' };
 
 const SUIT_SYMBOLS = { C: '&#9827;', D: '&#9830;', H: '&#9829;', S: '&#9824;', NT: 'NT' };
 const SUIT_DISPLAY = { C: '\u2663', D: '\u2666', H: '\u2665', S: '\u2660', NT: 'NT' };

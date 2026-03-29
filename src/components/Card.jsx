@@ -44,7 +44,7 @@ export default function Card({ card, onClick, playable, small, faceDown }) {
   return (
     <div
       className={`card ${color} ${playable ? 'playable' : ''} ${small ? 'small' : ''} ${onClick ? 'clickable' : ''}`}
-      onClick={onClick ? () => { playCardSound(); onClick(); } : undefined}
+      onClick={onClick}
     >
       <div className="card-corner top-left">
         <span className="card-rank">{card.rank}</span>

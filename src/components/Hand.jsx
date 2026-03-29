@@ -1,7 +1,7 @@
 import React from 'react';
 import Card from './Card';
 
-export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, position, isDummy }) {
+export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, position, isDummy, large }) {
   if (!cards || cards.length === 0) return null;
 
   const canPlay = (card) => {
@@ -9,8 +9,8 @@ export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, posit
     return playableCards.some(pc => pc.suit === card.suit && pc.rank === card.rank);
   };
 
-  // Dummy hand uses full-size cards regardless of position
-  const useSmall = isDummy ? false : position !== 'bottom';
+  // large = player's own hand (always full-size). Dummy also full-size. Others small.
+  const useSmall = large ? false : isDummy ? false : position !== 'bottom';
 
   return (
     <div className={`hand hand-${position} ${isDummy ? 'dummy-hand' : ''}`}>

@@ -590,19 +590,19 @@ body {
 .top-left { top: 5px; left: 6px; }
 .bottom-right { bottom: 5px; right: 6px; transform: rotate(180deg); }
 
-.card-rank { font-size: 1.15rem; font-weight: bold; }
-.card-suit { font-size: 0.95rem; }
+.card-rank { font-size: 1.35rem; font-weight: bold; }
+.card-suit { font-size: 1.1rem; }
 .card-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
-.card-suit-large { font-size: 2.4rem; }
+.card-suit-large { font-size: 2.8rem; }
 
-.card.small .card-rank { font-size: 0.95rem; }
-.card.small .card-suit { font-size: 0.8rem; }
-.card.small .card-suit-large { font-size: 1.8rem; }
+.card.small .card-rank { font-size: 1.05rem; }
+.card.small .card-suit { font-size: 0.9rem; }
+.card.small .card-suit-large { font-size: 2rem; }
 
 /* ========== Hand Layout ========== */
 .hand {
@@ -1268,9 +1268,9 @@ body {
 @media (max-width: 768px) {
   .card { width: 70px; height: 100px; }
   .card.small { width: 55px; height: 78px; }
-  .card-rank { font-size: 0.9rem; }
-  .card-suit { font-size: 0.75rem; }
-  .card-suit-large { font-size: 1.6rem; }
+  .card-rank { font-size: 1.05rem; }
+  .card-suit { font-size: 0.88rem; }
+  .card-suit-large { font-size: 1.9rem; }
 
   .bid-btn { width: 50px; height: 34px; font-size: 0.85rem; }
   .center-area { width: 95vw; }
@@ -1287,9 +1287,9 @@ body {
 @media (max-width: 480px) {
   .card { width: 52px; height: 74px; }
   .card.small { width: 42px; height: 60px; }
-  .card-rank { font-size: 0.75rem; }
-  .card-suit { font-size: 0.6rem; }
-  .card-suit-large { font-size: 1.2rem; }
+  .card-rank { font-size: 0.88rem; }
+  .card-suit { font-size: 0.72rem; }
+  .card-suit-large { font-size: 1.45rem; }
 
   .pos-bottom { bottom: 90px; }
   .hand-bottom { bottom: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
