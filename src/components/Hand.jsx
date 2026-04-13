@@ -1,7 +1,7 @@
 import React from 'react';
 import Card from './Card';
 
-export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, position, isDummy }) {
+export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, position, isDummy, large }) {
   if (!cards || cards.length === 0) return null;
 
   const canPlay = (card) => {
@@ -9,10 +9,10 @@ export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, posit
     return playableCards.some(pc => pc.suit === card.suit && pc.rank === card.rank);
   };
 
-  // Bottom position = fan layout for the player's own hand (feels like Trickster)
-  const isFan = position === 'bottom';
-  // Non-bottom hands always use small cards for compactness
-  const useSmall = position !== 'bottom';
+  // large = player's own hand (always full-size). Dummy also full-size. Others small.
+  const useSmall = large ? false : isDummy ? false : position !== 'bottom';
+  // Fan layout only at the bottom (player's own hand when seated South, or visually projected there)
+  const isFan = large && position === 'bottom';
   const count = cards.length;
 
   return (

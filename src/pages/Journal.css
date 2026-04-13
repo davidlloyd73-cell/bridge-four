@@ -1,0 +1,120 @@
+.journal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.journal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.journal-header h2 {
+  font-size: 1.2rem;
+}
+
+.journal-header .btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Filter tabs */
+.journal-filters {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  padding-bottom: var(--space-xs);
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-tab {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--color-warm-gray);
+  background: var(--color-sand);
+  transition: all 0.2s;
+}
+
+.filter-tab--active {
+  background: var(--color-terracotta);
+  color: white;
+}
+
+/* Feed */
+.journal-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.journal-empty {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--color-warm-gray);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.journal-entry {
+  padding: var(--space-lg);
+}
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.entry-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.entry-child-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.entry-date {
+  font-size: 0.8rem;
+  color: var(--color-warm-gray);
+}
+
+.entry-content {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.entry-content p {
+  margin: 0;
+}
+
+.entry-quote {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.1rem;
+  padding-left: var(--space-md);
+  border-left: 3px solid var(--color-gold);
+  color: var(--color-brown);
+  margin: 0;
+}
+
+.entry-footer {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-sand);
+}
+
+.entry-submitted {
+  font-size: 0.8rem;
+  color: var(--color-warm-gray);
+}

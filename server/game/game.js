@@ -283,7 +283,7 @@ function completeHand(game) {
     ? calculateScore(game.contract, tricksMade, game.vulnerability)
     : { NS: 0, EW: 0 };
 
-  game.scores.push({
+  const scoreEntry = {
     dealNumber: game.dealNumber,
     contract: game.contract ? { ...game.contract } : null,
     tricksMade,
@@ -298,8 +298,18 @@ function completeHand(game) {
     } : null,
     biddingHistory: game.bidding ? [...game.bidding.bids] : [],
     biddingDealer: game.dealer,
-  });
+  };
 
+  if (game.isReplayHand) {
+    // Practice replay — store result for review but don't affect totals or advance deal
+    scoreEntry.isReplay = true;
+    game.scores.push(scoreEntry);
+    game.isReplayHand = false;
+    game.phase = PHASES.HAND_COMPLETE;
+    return;
+  }
+
+  game.scores.push(scoreEntry);
   game.totalScores.NS += score.NS;
   game.totalScores.EW += score.EW;
 
@@ -317,6 +327,33 @@ function completeHand(game) {
   } else {
     game.phase = PHASES.HAND_COMPLETE;
   }
+}
+
+export function replayHand(game) {
+  if (!game.originalHands) return { error: 'No hand data to replay' };
+
+  // Restore original hands exactly as dealt
+  game.hands = {
+    N: [...game.originalHands.N],
+    E: [...game.originalHands.E],
+    S: [...game.originalHands.S],
+    W: [...game.originalHands.W],
+  };
+
+  // Reset bidding and play state — same dealer/vulnerability as the original hand
+  game.bidding = createBiddingState(game.dealer);
+  game.contract = null;
+  game.currentTrick = [];
+  game.trickLeader = null;
+  game.tricksWon = { NS: 0, EW: 0 };
+  game.trickNumber = 0;
+  game.dummyRevealed = false;
+  game.phase = PHASES.BIDDING;
+  game.currentTurn = game.dealer;
+  game.lastCompletedTrick = null;
+  game.isReplayHand = true; // Tells completeHand not to update totals
+
+  return { success: true };
 }
 
 export function getClientState(game, forSeat) {
