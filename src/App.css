@@ -800,11 +800,66 @@ body {
   background: rgba(0,0,0,0.5);
   padding: 2px 8px;
   border-radius: 4px;
+  display: inline-block;
 }
 
 .dummy-hand .card.playable {
   border-color: #2ecc71;
   box-shadow: 0 0 8px rgba(46,204,113,0.5);
+}
+
+/* ---------- Dummy grid: 4 columns (one per suit), trumps leftmost ----------
+   Each column stacks cards with a large negative margin so only the top strip
+   with rank+suit remains visible for cards behind the top one. */
+.dummy-grid { text-align: center; }
+.dummy-grid .dummy-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: flex-start;
+}
+.dummy-grid .dummy-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: var(--card-h-small);
+  min-width: var(--card-w-small);
+}
+.dummy-grid .dummy-slot {
+  /* Overlap: show ~30% of each card behind the top one, leaving enough
+     of the top-left corner for rank+suit to be readable. */
+  margin-top: calc(var(--card-h-small) * -0.7);
+}
+.dummy-grid .dummy-column .dummy-slot:first-child {
+  margin-top: 0;
+}
+.dummy-grid .dummy-empty {
+  width: var(--card-w-small);
+  height: calc(var(--card-h-small) * 0.35);
+  color: rgba(255,255,255,0.4);
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Override hand-top/left/right positioning for dummy-grid — the grid is a
+   wider block than the old flat stack, so it needs different anchoring. */
+.hand-top.dummy-grid {
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.hand-left.dummy-grid {
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.hand-right.dummy-grid {
+  right: 16px;
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* ========== Play Status Indicator ========== */
