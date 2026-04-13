@@ -21,6 +21,8 @@
   --card-h: 182px;
   --card-w-small: 85px;
   --card-h-small: 119px;
+  --dummy-card-w: 105px;
+  --dummy-card-h: 147px;
 
   /* Fan arc parameters.
      - spread = total angular sweep of the whole hand
@@ -810,7 +812,9 @@ body {
 
 /* ---------- Dummy grid: 4 columns (one per suit), trumps leftmost ----------
    Each column stacks cards with a large negative margin so only the top strip
-   with rank+suit remains visible for cards behind the top one. */
+   with rank+suit remains visible for cards behind the top one.
+   Dummy cards use their own size (--dummy-card-*) which is larger than the
+   standard "small" card so suit and rank remain clearly readable. */
 .dummy-grid { text-align: center; }
 .dummy-grid .dummy-columns {
   display: flex;
@@ -818,24 +822,31 @@ body {
   gap: 8px;
   align-items: flex-start;
 }
+.dummy-grid .card.small {
+  width: var(--dummy-card-w);
+  height: var(--dummy-card-h);
+}
+.dummy-grid .card.small .card-rank { font-size: 1.25rem; }
+.dummy-grid .card.small .card-suit { font-size: 1rem; }
+.dummy-grid .card.small .card-suit-large { font-size: 2.5rem; }
 .dummy-grid .dummy-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: var(--card-h-small);
-  min-width: var(--card-w-small);
+  min-height: var(--dummy-card-h);
+  min-width: var(--dummy-card-w);
 }
 .dummy-grid .dummy-slot {
   /* Overlap: show ~30% of each card behind the top one, leaving enough
      of the top-left corner for rank+suit to be readable. */
-  margin-top: calc(var(--card-h-small) * -0.7);
+  margin-top: calc(var(--dummy-card-h) * -0.7);
 }
 .dummy-grid .dummy-column .dummy-slot:first-child {
   margin-top: 0;
 }
 .dummy-grid .dummy-empty {
-  width: var(--card-w-small);
-  height: calc(var(--card-h-small) * 0.35);
+  width: var(--dummy-card-w);
+  height: calc(var(--dummy-card-h) * 0.35);
   color: rgba(255,255,255,0.4);
   font-size: 1.4rem;
   display: flex;
@@ -1575,6 +1586,8 @@ body {
     --card-h: 100px;
     --card-w-small: 55px;
     --card-h-small: 78px;
+    --dummy-card-w: 62px;
+    --dummy-card-h: 87px;
   }
   .card-rank { font-size: 1.05rem; }
   .card-suit { font-size: 0.88rem; }
@@ -1811,5 +1824,252 @@ body {
   .score-btn {
     padding: 0.45rem 0.8rem;
     min-height: 36px;
+  }
+}
+
+/* ── Partnership Selector ─────────────────────────────────────────── */
+.partnership-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.partnership-modal {
+  background: #1a1a1a;
+  border-radius: 14px;
+  padding: 1.75rem 2rem;
+  border: 2px solid var(--gold);
+  max-width: 640px;
+  width: 92vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+.partnership-modal h2 {
+  color: var(--gold);
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+.partnership-subtitle {
+  color: #ccc;
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+}
+.partnership-instructions {
+  color: #aaa;
+  text-align: center;
+  margin: 0 0 1.25rem 0;
+  font-size: 0.9rem;
+}
+.partnership-waiting {
+  color: #ddd;
+  text-align: center;
+  margin: 1rem 0;
+}
+.partnership-seats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.partnership-seat {
+  background: #262626;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.partnership-seat.filled {
+  border-color: var(--gold);
+}
+.partnership-seat .seat-label {
+  color: #888;
+  font-weight: bold;
+}
+.partnership-seat .seat-name {
+  color: #fff;
+}
+.partnership-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.partnership-option {
+  background: #222;
+  border: 2px solid #444;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  font-family: inherit;
+}
+.partnership-option:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: #2a2a2a;
+  transform: translateY(-1px);
+}
+.partnership-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.partnership-option .pair-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+}
+.partnership-option .pair-label {
+  color: #888;
+  font-size: 0.8rem;
+  font-weight: bold;
+  min-width: 50px;
+}
+.partnership-option .pair-names {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.partnership-option .vs {
+  color: var(--gold);
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 0.15rem 0;
+  letter-spacing: 0.15em;
+}
+.partnership-option .partner-hint {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #444;
+  color: #bbb;
+  font-size: 0.85rem;
+}
+.partnership-option .partner-hint strong {
+  color: var(--gold);
+}
+
+/* ── Video Feeds ─────────────────────────────────────────────────── */
+.video-feeds {
+  position: fixed;
+  z-index: 80;
+  pointer-events: none;
+}
+.video-tile {
+  position: fixed;
+  width: 160px;
+  height: 120px;
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+.video-tile.local {
+  border-color: #4aa;
+}
+.video-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Mirror local video so it feels like a mirror */
+}
+.video-tile.local video {
+  transform: scaleX(-1);
+}
+.video-tile .tile-label {
+  position: absolute;
+  bottom: 4px;
+  left: 6px;
+  right: 6px;
+  color: #fff;
+  font-size: 0.75rem;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.video-tile .tile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 0.75rem;
+  text-align: center;
+  padding: 0 0.5rem;
+}
+/* Video tile positions — the bottom tile is the local player. */
+.video-tile.video-top {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.video-tile.video-left {
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+}
+.video-tile.video-right {
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+.video-tile.video-bottom {
+  bottom: 8px;
+  right: 8px;
+}
+.video-controls {
+  position: fixed;
+  bottom: 8px;
+  left: 8px;
+  z-index: 90;
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+.video-controls button {
+  background: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.video-controls button.active {
+  background: #2a5;
+  border-color: #2a5;
+}
+.video-controls button.off {
+  background: #722;
+  border-color: #a44;
+}
+@media (max-width: 900px) {
+  .video-tile {
+    width: 110px;
+    height: 84px;
+  }
+}
+@media (max-width: 600px) {
+  .video-tile {
+    width: 84px;
+    height: 64px;
+  }
+  .video-tile .tile-label {
+    font-size: 0.65rem;
   }
 }

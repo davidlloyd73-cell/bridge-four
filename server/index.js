@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { createGame, addPlayer, removePlayer, allSeated, startDeal, processBid, playCard, replayHand, getClientState, PHASES } from './game/game.js';
+import { createGame, addPlayer, removePlayer, allSeated, startDeal, processBid, playCard, replayHand, getClientState, PHASES, choosePartnership, startNewRubber } from './game/game.js';
 import { calculateHCP } from './game/deck.js';
 import { chooseBid, chooseCard, getBotName } from './game/bot.js';
 import Anthropic from '@anthropic-ai/sdk';
@@ -302,7 +302,17 @@ function scheduleBotAdvance(game) {
 io.on('connection', (socket) => {
   console.log(`Player connected: ${socket.id}`);
   let currentGame = null;
-  let currentSeat = null;
+
+  // Compute the caller's current seat by socket id. The seat can change
+  // mid-session when a partnership rotation re-assigns seats, so we look
+  // it up dynamically on every action instead of caching.
+  const mySeat = () => {
+    if (!currentGame) return null;
+    for (const s of ['N','E','S','W']) {
+      if (currentGame.players[s]?.socketId === socket.id) return s;
+    }
+    return null;
+  };
 
   socket.on('get-lobby', ({ gameCode }, callback) => {
     const game = games[gameCode];
@@ -326,7 +336,6 @@ io.on('connection', (socket) => {
     }
 
     currentGame = game;
-    currentSeat = seat;
     socket.join(gameCode);
 
     callback({ success: true, seat });
@@ -370,6 +379,10 @@ io.on('connection', (socket) => {
   socket.on('start-game', (_, callback) => {
     if (!currentGame) { callback?.({ error: 'Not in a game' }); return; }
     if (!allSeated(currentGame)) { callback?.({ error: 'Need 4 players' }); return; }
+    if (currentGame.partnershipsPending) {
+      callback?.({ error: 'Choose partnerships first' });
+      return;
+    }
 
     startDeal(currentGame);
     callback?.({ success: true });
@@ -380,10 +393,27 @@ io.on('connection', (socket) => {
     scheduleBotAction(currentGame);
   });
 
-  socket.on('make-bid', ({ bid }, callback) => {
-    if (!currentGame || !currentSeat) { callback?.({ error: 'Not in a game' }); return; }
+  socket.on('choose-partnership', ({ nsPair, ewPair }, callback) => {
+    if (!currentGame) { callback?.({ error: 'Not in a game' }); return; }
+    const result = choosePartnership(currentGame, { nsPair, ewPair });
+    if (result.error) { callback?.({ error: result.error }); return; }
+    callback?.({ success: true });
+    // Auto-start the first deal of the rubber
+    startDeal(currentGame);
+    broadcastGameState(currentGame);
+    console.log(
+      `Partnerships chosen in ${currentGame.gameCode}: `
+      + `NS ${currentGame.players.N.name}/${currentGame.players.S.name} vs `
+      + `EW ${currentGame.players.E.name}/${currentGame.players.W.name}`
+    );
+    scheduleBotAction(currentGame);
+  });
 
-    const result = processBid(currentGame, currentSeat, bid);
+  socket.on('make-bid', ({ bid }, callback) => {
+    const seat = mySeat();
+    if (!currentGame || !seat) { callback?.({ error: 'Not in a game' }); return; }
+
+    const result = processBid(currentGame, seat, bid);
     if (result.error) { callback?.({ error: result.error }); return; }
 
     callback?.({ success: true });
@@ -400,9 +430,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('play-card', ({ card }, callback) => {
-    if (!currentGame || !currentSeat) { callback?.({ error: 'Not in a game' }); return; }
+    const seat = mySeat();
+    if (!currentGame || !seat) { callback?.({ error: 'Not in a game' }); return; }
 
-    const result = playCard(currentGame, currentSeat, card);
+    const result = playCard(currentGame, seat, card);
     if (result.error) { callback?.({ error: result.error }); return; }
 
     callback?.({ success: true });
@@ -463,18 +494,26 @@ io.on('connection', (socket) => {
   socket.on('new-round', (_, callback) => {
     if (!currentGame) { callback?.({ error: 'Not in a game' }); return; }
 
-    // Start a new chukker - rotate first dealer
-    const seats = ['N', 'E', 'S', 'W'];
-    const oldIdx = seats.indexOf(currentGame.firstDealer);
-    currentGame.firstDealer = seats[(oldIdx + 1) % 4];
-
-    startDeal(currentGame);
+    // A new rubber rotates partnerships — reset to a fresh waiting state
+    // with partnershipsPending so the clients re-pick who partners whom.
+    // Career individualScores persist across rubbers.
+    startNewRubber(currentGame);
     callback?.({ success: true });
     broadcastGameState(currentGame);
-    console.log(`New round started - First dealer: ${currentGame.firstDealer}`);
+    console.log(`New rubber started in ${currentGame.gameCode} — awaiting partnership selection`);
+  });
 
-    // Kick off bot actions
-    scheduleBotAction(currentGame);
+  // ── WebRTC signalling relay ─────────────────────────────────────────
+  // Forwards offer/answer/ICE candidates between the 4 players in a game.
+  // Clients send { to: 'N'|'E'|'S'|'W', type, payload }; we look up the
+  // target socket by seat in the same game and forward a { from, type, payload }.
+  socket.on('webrtc-signal', ({ to, type, payload }) => {
+    if (!currentGame) return;
+    const fromSeat = mySeat();
+    if (!fromSeat) return;
+    const target = currentGame.players[to];
+    if (!target || target.isBot || !target.socketId) return;
+    io.to(target.socketId).emit('webrtc-signal', { from: fromSeat, type, payload });
   });
 
   socket.on('disconnect', () => {

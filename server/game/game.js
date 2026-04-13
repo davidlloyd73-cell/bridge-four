@@ -17,6 +17,8 @@ export function createGame(gameCode) {
     gameCode,
     players: {},         // { N: { name, socketId }, E: ..., S: ..., W: ... }
     phase: PHASES.WAITING,
+    partnershipsPending: false, // true once 4 humans are seated and the
+                                // pairing has not been chosen yet
     firstDealer: 'N',
     dealNumber: 0,       // Overall deal number (0-based)
     dealer: 'N',
@@ -32,29 +34,99 @@ export function createGame(gameCode) {
     dummyRevealed: false,
     scores: [],          // [{ dealNumber, contract, tricksMade, score: {NS, EW}, vulnerability, dealer }]
     totalScores: { NS: 0, EW: 0 },
-    individualScores: { N: 0, E: 0, S: 0, W: 0 },
+    // Career scores keyed by PLAYER NAME so they survive partnership
+    // rotation (seats change, but names don't).
+    individualScores: {},
     currentTurn: null,
     lastCompletedTrick: null,
   };
 }
 
+// Returns true if all 4 seats are filled by humans (no bots).
+export function allHumansSeated(game) {
+  return ['N','E','S','W'].every(s => game.players[s] && !game.players[s].isBot);
+}
+
+// Rearranges seats so the two pairs become NS and EW partnerships.
+// nsPair and ewPair each contain two player names from the current game.
+// Returns { error } on bad input, { success } otherwise.
+export function choosePartnership(game, { nsPair, ewPair }) {
+  const seats = ['N','E','S','W'];
+  const current = seats.map(s => game.players[s]).filter(Boolean);
+  if (current.length !== 4) return { error: 'Need 4 players first' };
+  const all = [...nsPair, ...ewPair];
+  if (all.length !== 4 || new Set(all).size !== 4) {
+    return { error: 'Invalid pairing' };
+  }
+  const byName = Object.fromEntries(current.map(p => [p.name, p]));
+  for (const n of all) {
+    if (!byName[n]) return { error: `${n} is not in this game` };
+  }
+  game.players = {
+    N: byName[nsPair[0]],
+    S: byName[nsPair[1]],
+    E: byName[ewPair[0]],
+    W: byName[ewPair[1]],
+  };
+  game.partnershipsPending = false;
+  return { success: true };
+}
+
+// Resets the game to a fresh rubber while keeping career individualScores
+// and the current players (they'll re-pick partnerships next).
+export function startNewRubber(game) {
+  game.phase = PHASES.WAITING;
+  game.partnershipsPending = true;
+  game.dealNumber = 0;
+  game.firstDealer = 'N';
+  game.scores = [];
+  game.totalScores = { NS: 0, EW: 0 };
+  game.hands = {};
+  game.hcp = {};
+  game.bidding = null;
+  game.contract = null;
+  game.currentTrick = [];
+  game.trickLeader = null;
+  game.tricksWon = { NS: 0, EW: 0 };
+  game.trickNumber = 0;
+  game.dummyRevealed = false;
+  game.currentTurn = null;
+  game.lastCompletedTrick = null;
+  game.originalHands = null;
+}
+
 export function addPlayer(game, seat, name, socketId) {
   const existing = game.players[seat];
+  let result;
   if (existing) {
     // Same name reconnecting: replace the socketId so the live client gets updates.
     if (!existing.isBot && existing.name === name) {
       game.players[seat] = { ...existing, socketId };
-      return { success: true, reconnected: true };
+      result = { success: true, reconnected: true };
     }
     // A bot sitting in this seat yields to a human with the same preset name.
-    if (existing.isBot) {
+    else if (existing.isBot) {
       game.players[seat] = { name, socketId };
-      return { success: true, replacedBot: true };
+      result = { success: true, replacedBot: true };
     }
-    return { error: 'Seat already taken' };
+    else {
+      return { error: 'Seat already taken' };
+    }
+  } else {
+    game.players[seat] = { name, socketId };
+    result = { success: true };
   }
-  game.players[seat] = { name, socketId };
-  return { success: true };
+
+  // Once 4 humans are seated and a game hasn't started yet, prompt for
+  // partnership selection. Skip if a hand is already in progress.
+  if (game.phase === PHASES.WAITING && allHumansSeated(game) && !game.partnershipsPending) {
+    // Only mark pending if partnerships haven't been locked in yet for this rubber
+    // (dealNumber 0 means we're still pre-deal).
+    if (game.dealNumber === 0) {
+      game.partnershipsPending = true;
+    }
+  }
+  return result;
 }
 
 export function removePlayer(game, socketId) {
@@ -313,11 +385,17 @@ function completeHand(game) {
   game.totalScores.NS += score.NS;
   game.totalScores.EW += score.EW;
 
-  // Individual scoring: each player gets their team's score for the deal
-  game.individualScores.N += score.NS;
-  game.individualScores.S += score.NS;
-  game.individualScores.E += score.EW;
-  game.individualScores.W += score.EW;
+  // Individual scoring: career totals keyed by PLAYER NAME so they survive
+  // partnership rotation. Each player gets their team's score for the deal.
+  const addScore = (seat, value) => {
+    const name = game.players[seat]?.name;
+    if (!name) return;
+    game.individualScores[name] = (game.individualScores[name] || 0) + value;
+  };
+  addScore('N', score.NS);
+  addScore('S', score.NS);
+  addScore('E', score.EW);
+  addScore('W', score.EW);
 
   game.dealNumber++;
 
@@ -360,6 +438,7 @@ export function getClientState(game, forSeat) {
   const state = {
     gameCode: game.gameCode,
     phase: game.phase,
+    partnershipsPending: !!game.partnershipsPending,
     players: {},
     dealNumber: game.dealNumber,
     dealer: game.dealer,
@@ -373,7 +452,7 @@ export function getClientState(game, forSeat) {
   // Player info
   for (const seat of ['N', 'E', 'S', 'W']) {
     state.players[seat] = game.players[seat]
-      ? { name: game.players[seat].name, seated: true }
+      ? { name: game.players[seat].name, seated: true, isBot: !!game.players[seat].isBot }
       : { seated: false };
   }
 

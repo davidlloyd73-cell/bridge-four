@@ -178,25 +178,47 @@ export default function DealReview({
           </div>
         )}
 
-        {/* Individual standings */}
+        {/* Individual standings — name-keyed so they survive partnership
+            rotation. Currently seated players get shown first with their
+            seat; any historical players carry over from previous rubbers. */}
         {individualScores && (
           <div className="review-standings">
             <h3>{isRoundComplete ? 'Round Standings' : 'Standings'}</h3>
             <div className="review-standings-list">
-              {['N', 'E', 'S', 'W']
-                .map(seat => ({
-                  seat,
-                  name: playerName(seat),
-                  score: individualScores[seat] || 0,
-                }))
-                .sort((a, b) => b.score - a.score)
-                .map((p, idx) => (
-                  <div key={p.seat} className={`review-standing-row ${idx === 0 ? 'leader' : ''}`}>
-                    <span className="standing-rank">{idx + 1}.</span>
-                    <span className="standing-name">{p.name} ({p.seat})</span>
-                    <span className="standing-score">{p.score}</span>
-                  </div>
-                ))}
+              {(() => {
+                const seen = new Set();
+                const rows = [];
+                for (const seat of ['N', 'E', 'S', 'W']) {
+                  const name = playerName(seat);
+                  if (!name || seen.has(name)) continue;
+                  seen.add(name);
+                  rows.push({
+                    seat,
+                    name,
+                    score: individualScores[name] || 0,
+                  });
+                }
+                for (const [name, score] of Object.entries(individualScores)) {
+                  if (seen.has(name)) continue;
+                  seen.add(name);
+                  rows.push({ seat: null, name, score });
+                }
+                return rows
+                  .sort((a, b) => b.score - a.score)
+                  .map((p, idx) => (
+                    <div
+                      key={p.name}
+                      className={`review-standing-row ${idx === 0 ? 'leader' : ''}`}
+                    >
+                      <span className="standing-rank">{idx + 1}.</span>
+                      <span className="standing-name">
+                        {p.name}
+                        {p.seat && ` (${p.seat})`}
+                      </span>
+                      <span className="standing-score">{p.score}</span>
+                    </div>
+                  ));
+              })()}
             </div>
           </div>
         )}
