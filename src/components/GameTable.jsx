@@ -342,6 +342,7 @@ export default function GameTable({
             playableCards={dummyPlayableCards}
             position={getPosition(gameState.dummySeat, mySeat)}
             isDummy
+            trumpSuit={gameState.contract?.suit}
           />
         )}
       </div>
