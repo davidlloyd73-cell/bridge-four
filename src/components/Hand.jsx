@@ -11,8 +11,8 @@ export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, posit
 
   // large = player's own hand (always full-size). Dummy also full-size. Others small.
   const useSmall = large ? false : isDummy ? false : position !== 'bottom';
-  // Fan layout only at the bottom (player's own hand when seated South, or visually projected there)
-  const isFan = large && position === 'bottom';
+  // Fan layout for the player's own hand at any compass position
+  const isFan = !!large;
   const count = cards.length;
 
   return (
