@@ -304,6 +304,18 @@ io.on('connection', (socket) => {
   let currentGame = null;
   let currentSeat = null;
 
+  socket.on('get-lobby', ({ gameCode }, callback) => {
+    const game = games[gameCode];
+    const players = {};
+    if (game) {
+      for (const seat of ['N', 'E', 'S', 'W']) {
+        const p = game.players[seat];
+        if (p) players[seat] = { name: p.name, isBot: !!p.isBot, seated: true };
+      }
+    }
+    callback?.({ players });
+  });
+
   socket.on('join-game', ({ gameCode, name, seat }, callback) => {
     const game = getOrCreateGame(gameCode);
     const result = addPlayer(game, seat, name, socket.id);
@@ -320,7 +332,13 @@ io.on('connection', (socket) => {
     callback({ success: true, seat });
     broadcastGameState(game);
 
-    console.log(`${name} joined ${gameCode} as ${seat}`);
+    if (result.reconnected) {
+      console.log(`${name} reconnected to ${gameCode} as ${seat}`);
+    } else if (result.replacedBot) {
+      console.log(`${name} replaced bot in ${gameCode} seat ${seat}`);
+    } else {
+      console.log(`${name} joined ${gameCode} as ${seat}`);
+    }
   });
 
   socket.on('add-bots', (_, callback) => {

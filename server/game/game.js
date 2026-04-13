@@ -39,7 +39,18 @@ export function createGame(gameCode) {
 }
 
 export function addPlayer(game, seat, name, socketId) {
-  if (game.players[seat]) {
+  const existing = game.players[seat];
+  if (existing) {
+    // Same name reconnecting: replace the socketId so the live client gets updates.
+    if (!existing.isBot && existing.name === name) {
+      game.players[seat] = { ...existing, socketId };
+      return { success: true, reconnected: true };
+    }
+    // A bot sitting in this seat yields to a human with the same preset name.
+    if (existing.isBot) {
+      game.players[seat] = { name, socketId };
+      return { success: true, replacedBot: true };
+    }
     return { error: 'Seat already taken' };
   }
   game.players[seat] = { name, socketId };

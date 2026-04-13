@@ -15,6 +15,25 @@
   --blue: #2471a3;
   --vulnerable: #c0392b;
   --active: #f1c40f;
+
+  /* Card dimensions - overridden per breakpoint */
+  --card-w: 100px;
+  --card-h: 140px;
+  --card-w-small: 75px;
+  --card-h-small: 105px;
+
+  /* Fan arc parameters.
+     - spread = total angular sweep of the whole hand
+     - pivot = transform-origin Y (percent of card height from top);
+       >100% means the pivot is below the card, creating a fan with
+       middle card highest and edge cards angled outward.
+     - fan-bottom lifts cards off the container base so that rotated
+       edge cards don't clip off the bottom. */
+  --fan-spread: 60deg;
+  --fan-pivot: 180%;
+  --fan-bottom: calc(var(--card-h) * 0.3);
+  --fan-width: calc(var(--card-h) * 2 + var(--card-w));
+  --fan-height: calc(var(--card-h) * 2);
 }
 
 body {
@@ -140,6 +159,78 @@ body {
 }
 .join-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .join-btn:hover:not(:disabled) { opacity: 0.9; }
+
+/* ---------- Preset player buttons (new lobby) ---------- */
+.preset-players {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.preset-player-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 1rem 0.75rem;
+  min-height: 86px;
+  border: 2px solid #444;
+  border-radius: 10px;
+  background: #1a1a1a;
+  color: #ddd;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.preset-player-btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(212,168,67,0.1);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.preset-player-btn .preset-name {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: var(--gold);
+}
+.preset-player-btn .preset-seat {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #aaa;
+}
+.preset-player-btn .preset-status {
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 0.25rem;
+  font-style: italic;
+  text-align: center;
+}
+.preset-player-btn.occupied {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #333;
+}
+.preset-player-btn.self {
+  border-color: #2ecc71;
+  background: rgba(46,204,113,0.08);
+}
+.preset-player-btn.self .preset-name { color: #2ecc71; }
+.preset-player-btn.bot-sitting {
+  border-color: #8e44ad;
+  background: rgba(142,68,173,0.08);
+}
+.preset-player-btn:disabled { cursor: not-allowed; }
+
+.lobby-hint {
+  text-align: center;
+  color: #888;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
 
 .error-msg {
   color: var(--red);
@@ -540,8 +631,8 @@ body {
 
 /* ========== Cards ========== */
 .card {
-  width: 100px;
-  height: 140px;
+  width: var(--card-w);
+  height: var(--card-h);
   background: var(--card-white);
   border-radius: 8px;
   position: relative;
@@ -551,8 +642,8 @@ body {
 }
 
 .card.small {
-  width: 75px;
-  height: 105px;
+  width: var(--card-w-small);
+  height: var(--card-h-small);
 }
 
 .card.red { color: #c0392b; }
@@ -635,51 +726,50 @@ body {
   display: flex;
   gap: 0;
 }
-.hand-bottom .hand-cards { gap: 0; }
 
-.hand-bottom .hand-cards .card {
-  margin-left: -25px;
+/* Non-fan hand card slots are transparent wrappers */
+.hand:not(.hand-fan) .hand-card-slot { display: contents; }
+
+/* ---------- Fan layout (player's own hand at bottom) ---------- */
+.hand-fan .hand-cards {
+  position: relative;
+  display: block;
+  width: var(--fan-width);
+  height: var(--fan-height);
+  margin: 0 auto;
 }
-.hand-bottom .hand-cards .card:first-child { margin-left: 0; }
+.hand-fan .hand-card-slot {
+  position: absolute;
+  left: 50%;
+  bottom: var(--fan-bottom);
+  margin-left: calc(var(--card-w) / -2);
+  transform-origin: 50% var(--fan-pivot);
+  transform: rotate(calc(
+    (var(--card-idx) - (var(--card-count) - 1) / 2)
+    * var(--fan-spread)
+    / max(var(--card-count) - 1, 1)
+  ));
+  transition: transform 0.25s ease;
+}
 
-.hand-top .hand-cards .card.small,
-.hand-left .hand-cards .card.small,
-.hand-right .hand-cards .card.small {
+/* ---------- Top hand (straight horizontal overlap) ---------- */
+.hand-top .hand-cards .card {
   margin-left: -35px;
 }
-.hand-top .hand-cards .card.small:first-child,
-.hand-left .hand-cards .card.small:first-child,
-.hand-right .hand-cards .card.small:first-child { margin-left: 0; }
+.hand-top .hand-cards .card:first-child { margin-left: 0; }
 
-/* Full-size cards at non-bottom positions (e.g. dummy) */
-.hand-top .hand-cards .card:not(.small),
-.hand-left .hand-cards .card:not(.small),
-.hand-right .hand-cards .card:not(.small) {
-  margin-left: -50px;
-}
-.hand-top .hand-cards .card:not(.small):first-child,
-.hand-left .hand-cards .card:not(.small):first-child,
-.hand-right .hand-cards .card:not(.small):first-child { margin-left: 0; }
-
+/* ---------- Side hands (vertical stack) ---------- */
 .hand-left .hand-cards,
 .hand-right .hand-cards {
   flex-direction: column;
 }
-.hand-left .hand-cards .card.small,
-.hand-right .hand-cards .card.small {
+.hand-left .hand-cards .card,
+.hand-right .hand-cards .card {
   margin-left: 0;
   margin-top: -65px;
 }
-.hand-left .hand-cards .card.small:first-child,
-.hand-right .hand-cards .card.small:first-child { margin-top: 0; }
-
-.hand-left .hand-cards .card:not(.small),
-.hand-right .hand-cards .card:not(.small) {
-  margin-left: 0;
-  margin-top: -90px;
-}
-.hand-left .hand-cards .card:not(.small):first-child,
-.hand-right .hand-cards .card:not(.small):first-child { margin-top: 0; }
+.hand-left .hand-cards .card:first-child,
+.hand-right .hand-cards .card:first-child { margin-top: 0; }
 
 .dummy-label {
   text-align: center;
@@ -1407,8 +1497,12 @@ body {
 
 /* ========== Responsive ========== */
 @media (max-width: 768px) {
-  .card { width: 70px; height: 100px; }
-  .card.small { width: 55px; height: 78px; }
+  :root {
+    --card-w: 70px;
+    --card-h: 100px;
+    --card-w-small: 55px;
+    --card-h-small: 78px;
+  }
   .card-rank { font-size: 1.05rem; }
   .card-suit { font-size: 0.88rem; }
   .card-suit-large { font-size: 1.9rem; }
@@ -1417,8 +1511,6 @@ body {
   .center-area { width: 95vw; }
   .pos-bottom { bottom: 130px; }
 
-  .hand-bottom .hand-cards .card { margin-left: -20px; }
-
   .trick-pos-bottom { bottom: 18%; }
   .trick-pos-top { top: 12%; }
   .trick-pos-left { left: 15%; }
@@ -1426,15 +1518,20 @@ body {
 }
 
 @media (max-width: 480px) {
-  .card { width: 52px; height: 74px; }
-  .card.small { width: 42px; height: 60px; }
+  :root {
+    --card-w: 52px;
+    --card-h: 74px;
+    --card-w-small: 42px;
+    --card-h-small: 60px;
+    /* A slightly wider fan for smaller cards keeps the visible arc */
+    --fan-spread: 70deg;
+  }
   .card-rank { font-size: 0.88rem; }
   .card-suit { font-size: 0.72rem; }
   .card-suit-large { font-size: 1.45rem; }
 
   .pos-bottom { bottom: 90px; }
   .hand-bottom { bottom: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
-  .hand-bottom .hand-cards .card { margin-left: -14px; }
 
   /* Compact bidding box */
   .bidding-box { padding: 0.5rem; }
@@ -1469,38 +1566,7 @@ body {
     margin-top: -48px;
   }
 
-  /* Force dummy hand cards smaller on mobile */
-  .dummy-hand .hand-cards .card {
-    width: 42px !important;
-    height: 60px !important;
-  }
-  .dummy-hand .hand-cards .card .card-rank { font-size: 0.7rem; }
-  .dummy-hand .hand-cards .card .card-suit { font-size: 0.55rem; }
-  .dummy-hand .hand-cards .card .card-suit-large { font-size: 1rem; }
   .dummy-label { font-size: 0.7rem; margin-bottom: 2px; padding: 1px 5px; }
-
-  /* Aggressive vertical overlap for dummy on left/right */
-  .dummy-hand.hand-left .hand-cards .card,
-  .dummy-hand.hand-right .hand-cards .card {
-    margin-top: -48px !important;
-  }
-  .dummy-hand.hand-left .hand-cards .card:first-child,
-  .dummy-hand.hand-right .hand-cards .card:first-child {
-    margin-top: 0 !important;
-  }
-  /* Horizontal overlap for dummy on top */
-  .dummy-hand.hand-top .hand-cards .card {
-    margin-left: -28px !important;
-  }
-  .dummy-hand.hand-top .hand-cards .card:first-child {
-    margin-left: 0 !important;
-  }
-
-  /* Vertical full-size cards at side positions (non-dummy) */
-  .hand-left .hand-cards .card:not(.small),
-  .hand-right .hand-cards .card:not(.small) {
-    margin-top: -55px;
-  }
 
   .deal-review { padding: 1rem; }
   .review-content { flex-direction: column; }
@@ -1517,8 +1583,15 @@ body {
 
 @media (max-width: 375px) {
   /* Cards */
-  .card { width: 48px; height: 68px; border-radius: 6px; }
-  .card.small { width: 38px; height: 54px; border-radius: 5px; }
+  :root {
+    --card-w: 48px;
+    --card-h: 68px;
+    --card-w-small: 38px;
+    --card-h-small: 54px;
+    --fan-spread: 74deg;
+  }
+  .card { border-radius: 6px; }
+  .card.small { border-radius: 5px; }
   .card-rank { font-size: 0.7rem; }
   .card-suit { font-size: 0.55rem; }
   .card-suit-large { font-size: 1rem; }
@@ -1528,7 +1601,6 @@ body {
 
   /* Bottom hand */
   .hand-bottom { bottom: 6px; }
-  .hand-bottom .hand-cards .card { margin-left: -12px; }
 
   /* Player positions */
   .pos-bottom { bottom: 80px; }
@@ -1555,14 +1627,6 @@ body {
   }
   .hand-top .hand-cards .card.small {
     margin-left: -28px;
-  }
-
-  /* Full-size cards at non-bottom positions */
-  .hand-top .hand-cards .card:not(.small) { margin-left: -30px; }
-  .hand-left .hand-cards .card:not(.small),
-  .hand-right .hand-cards .card:not(.small) {
-    margin-left: 0;
-    margin-top: -50px;
   }
 
   /* Center area */
