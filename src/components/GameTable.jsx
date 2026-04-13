@@ -1,7 +1,20 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 
-// Fixed compass: N always top, E always right, S always bottom, W always left
-const FIXED_POSITIONS = { N: 'top', E: 'right', S: 'bottom', W: 'left' };
+// Relative compass: mySeat is always at the bottom, with the other seats
+// rotated around it (partner across = top, LHO/RHO at the sides).
+//   mySeat=S: { N: top,    E: right, S: bottom, W: left   }  (no rotation)
+//   mySeat=W: { N: left,   E: top,   S: right,  W: bottom }
+//   mySeat=N: { N: bottom, E: left,  S: top,    W: right  }
+//   mySeat=E: { N: right,  E: bottom,S: left,   W: top    }
+const RELATIVE_POSITIONS = {
+  S: { N: 'top',    E: 'right', S: 'bottom', W: 'left'   },
+  W: { N: 'left',   E: 'top',   S: 'right',  W: 'bottom' },
+  N: { N: 'bottom', E: 'left',  S: 'top',    W: 'right'  },
+  E: { N: 'right',  E: 'bottom',S: 'left',   W: 'top'    },
+};
+function getPosition(seat, mySeat) {
+  return (RELATIVE_POSITIONS[mySeat] || RELATIVE_POSITIONS.S)[seat];
+}
 import Hand from './Hand';
 import Card from './Card';
 import BiddingBox, { BiddingHistory } from './BiddingBox';
@@ -140,9 +153,9 @@ export default function GameTable({
 
       {/* Game table */}
       <div className={`table phase-${phase}`}>
-        {/* Player positions — fixed compass: N top, E right, S bottom, W left */}
+        {/* Player positions — mySeat is always at the bottom, others rotated around */}
         {['N', 'E', 'S', 'W'].map((seat) => {
-          const pos = FIXED_POSITIONS[seat];
+          const pos = getPosition(seat, mySeat);
           const player = players[seat];
           const isDealer = seat === dealer;
           const isCurrentTurn = seat === gameState.currentTurn;
@@ -289,14 +302,14 @@ export default function GameTable({
           />
         )}
 
-        {/* My hand — at my fixed compass position, always full-size */}
+        {/* My hand — always at the bottom, always full-size */}
         {gameState.myHand && gameState.myHand.length > 0 && (humanPlaysBoth || gameState.dummySeat !== mySeat) && (
           <Hand
             cards={gameState.myHand}
             onPlayCard={onPlayCard}
             isMyTurn={(gameState.currentTurn === mySeat && phase === 'playing') || false}
             playableCards={playableCards}
-            position={FIXED_POSITIONS[mySeat]}
+            position={getPosition(mySeat, mySeat)}
             isDummy={humanPlaysBoth}
             large
           />
@@ -309,7 +322,7 @@ export default function GameTable({
             onPlayCard={onPlayCard}
             isMyTurn={gameState.currentTurn === gameState.declarerSeat && phase === 'playing'}
             playableCards={declarerPlayableCards}
-            position={FIXED_POSITIONS[gameState.declarerSeat]}
+            position={getPosition(gameState.declarerSeat, mySeat)}
             large
           />
         )}
@@ -327,7 +340,7 @@ export default function GameTable({
               gameState.contract?.declarer === mySeat && gameState.declarerControlsDummy
             }
             playableCards={dummyPlayableCards}
-            position={FIXED_POSITIONS[gameState.dummySeat]}
+            position={getPosition(gameState.dummySeat, mySeat)}
             isDummy
           />
         )}
@@ -401,7 +414,7 @@ export default function GameTable({
               {['N','E','S','W'].map(seat => {
                 const entry = savedLastTrick.current.cards?.find(c => c.seat === seat);
                 const isWinner = savedLastTrick.current.winner === seat;
-                const pos = FIXED_POSITIONS[seat];
+                const pos = getPosition(seat, mySeat);
                 return (
                   <div key={seat} className={`last-trick-pos last-trick-${pos} ${isWinner ? 'trick-winner' : ''}`}>
                     <div className="last-trick-seat-name">{gameState?.players?.[seat]?.name || seat}</div>
