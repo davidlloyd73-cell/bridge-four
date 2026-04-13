@@ -803,6 +803,15 @@ body {
   transform-origin: 180% 50%;
 }
 
+/* In top and left fans the overlap hides the upper-left of each card,
+   so the bottom-right corner label is what's visible. It normally has
+   transform: rotate(180deg) (so the opposing player can read it); in
+   these fans we un-rotate it so the player sees an upright label. */
+.hand-fan.hand-top .card .bottom-right,
+.hand-fan.hand-left .card .bottom-right {
+  transform: none;
+}
+
 .dummy-label {
   text-align: center;
   color: var(--gold);
