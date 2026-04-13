@@ -1,80 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { socket } from '../socket';
 
-const SEATS = [
-  { id: 'N', label: 'North' },
-  { id: 'E', label: 'East' },
-  { id: 'S', label: 'South' },
-  { id: 'W', label: 'West' },
+// Preset players - fixed names and seat assignments.
+// All four play in the same shared room.
+const PLAYERS = [
+  { name: 'David',    seat: 'N', seatName: 'North' },
+  { name: 'Hamish',   seat: 'E', seatName: 'East'  },
+  { name: 'Vivienne', seat: 'S', seatName: 'South' },
+  { name: 'Caroline', seat: 'W', seatName: 'West'  },
 ];
 
-export default function Lobby({ onJoin, error }) {
-  const [name, setName] = useState('');
-  const [gameCode, setGameCode] = useState('bridge1');
-  const [seat, setSeat] = useState('');
+const GAME_CODE = 'bridge1';
 
-  const handleJoin = (e) => {
-    e.preventDefault();
-    if (name.trim() && seat) {
-      onJoin(gameCode.trim(), name.trim(), seat);
-    }
+export default function Lobby({ onJoin, error }) {
+  const [occupied, setOccupied] = useState({}); // { N: { name, isBot }, ... }
+  const [joining, setJoining] = useState(null);
+
+  // Poll the lobby state so everyone can see who has joined.
+  useEffect(() => {
+    let stopped = false;
+
+    const fetchLobby = () => {
+      socket.emit('get-lobby', { gameCode: GAME_CODE }, (res) => {
+        if (stopped) return;
+        if (res && res.players) setOccupied(res.players);
+      });
+    };
+
+    fetchLobby();
+    const interval = setInterval(fetchLobby, 2000);
+
+    return () => {
+      stopped = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Clear pending join state when an error comes back from the server.
+  useEffect(() => {
+    if (error) setJoining(null);
+  }, [error]);
+
+  const handleJoin = (player) => {
+    setJoining(player.name);
+    onJoin(GAME_CODE, player.name, player.seat);
   };
+
+  const seatedCount = Object.values(occupied).filter(p => p?.seated && !p?.isBot).length;
 
   return (
     <div className="app lobby-screen">
       <div className="lobby">
         <h1>Bridge Four</h1>
-        <p className="subtitle">Chicago Bridge for Friends</p>
+        <p className="subtitle">Who's playing tonight?</p>
 
-        <form onSubmit={handleJoin}>
-          <div className="form-group">
-            <label>Your Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
-              maxLength={20}
-              autoFocus
-            />
-          </div>
+        <div className="preset-players">
+          {PLAYERS.map(player => {
+            const slot = occupied[player.seat];
+            const takenByOther = slot?.seated && !slot.isBot && slot.name !== player.name;
+            const takenBySelf  = slot?.seated && !slot.isBot && slot.name === player.name;
+            const takenByBot   = slot?.seated && slot.isBot;
+            const isJoining    = joining === player.name;
 
-          <div className="form-group">
-            <label>Game Room</label>
-            <input
-              type="text"
-              value={gameCode}
-              onChange={(e) => setGameCode(e.target.value)}
-              placeholder="Room code"
-              maxLength={20}
-            />
-          </div>
+            let statusLabel = null;
+            if (takenBySelf)  statusLabel = 'Joined — tap to reconnect';
+            else if (takenByOther) statusLabel = `${slot.name} already here`;
+            else if (takenByBot)   statusLabel = `Bot "${slot.name}" sitting here`;
 
-          <div className="form-group">
-            <label>Choose Your Seat</label>
-            <div className="seat-picker">
-              {SEATS.map(s => (
-                <button
-                  key={s.id}
-                  type="button"
-                  className={`seat-btn ${seat === s.id ? 'selected' : ''}`}
-                  onClick={() => setSeat(s.id)}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
+            const disabled = takenByOther || isJoining;
 
-          {error && <div className="error-msg">{error}</div>}
+            return (
+              <button
+                key={player.name}
+                type="button"
+                className={[
+                  'preset-player-btn',
+                  takenBySelf ? 'self' : '',
+                  takenByOther ? 'occupied' : '',
+                  takenByBot ? 'bot-sitting' : '',
+                ].filter(Boolean).join(' ')}
+                onClick={() => !disabled && handleJoin(player)}
+                disabled={disabled}
+              >
+                <span className="preset-name">{player.name}</span>
+                <span className="preset-seat">{player.seatName}</span>
+                {statusLabel && <span className="preset-status">{statusLabel}</span>}
+              </button>
+            );
+          })}
+        </div>
 
-          <button
-            type="submit"
-            className="join-btn"
-            disabled={!name.trim() || !seat}
-          >
-            Join Game
-          </button>
-        </form>
+        {error && <div className="error-msg">{error}</div>}
+
+        <p className="lobby-hint">
+          {seatedCount === 0
+            ? 'No one here yet. Tap your name to sit down.'
+            : `${seatedCount} player${seatedCount === 1 ? '' : 's'} waiting. You can add bots once you're in.`}
+        </p>
       </div>
     </div>
   );
