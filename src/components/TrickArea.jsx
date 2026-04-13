@@ -45,7 +45,7 @@ export default function TrickArea({ currentTrick, lastCompletedTrick, mySeat, co
     };
   }, [currentTrick, lastCompletedTrick]);
 
-  const seatToPosition = FIXED_POSITIONS;
+  const seatToPosition = (RELATIVE_POSITIONS[mySeat] || RELATIVE_POSITIONS.S);
 
   return (
     <div className="trick-area-overlay">
@@ -84,8 +84,13 @@ export default function TrickArea({ currentTrick, lastCompletedTrick, mySeat, co
   );
 }
 
-// Fixed compass: N always top, E always right, S always bottom, W always left
-const FIXED_POSITIONS = { N: 'top', E: 'right', S: 'bottom', W: 'left' };
+// Rotate so mySeat is always at the bottom of the table view
+const RELATIVE_POSITIONS = {
+  S: { N: 'top',    E: 'right', S: 'bottom', W: 'left'   },
+  W: { N: 'left',   E: 'top',   S: 'right',  W: 'bottom' },
+  N: { N: 'bottom', E: 'left',  S: 'top',    W: 'right'  },
+  E: { N: 'right',  E: 'bottom',S: 'left',   W: 'top'    },
+};
 
 const SUIT_SYMBOLS = { C: '&#9827;', D: '&#9830;', H: '&#9829;', S: '&#9824;', NT: 'NT' };
 const SUIT_DISPLAY = { C: '\u2663', D: '\u2666', H: '\u2665', S: '\u2660', NT: 'NT' };

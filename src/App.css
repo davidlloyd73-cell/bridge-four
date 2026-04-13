@@ -17,10 +17,10 @@
   --active: #f1c40f;
 
   /* Card dimensions - overridden per breakpoint */
-  --card-w: 100px;
-  --card-h: 140px;
-  --card-w-small: 75px;
-  --card-h-small: 105px;
+  --card-w: 130px;
+  --card-h: 182px;
+  --card-w-small: 85px;
+  --card-h-small: 119px;
 
   /* Fan arc parameters.
      - spread = total angular sweep of the whole hand
@@ -681,19 +681,19 @@ body {
 .top-left { top: 5px; left: 6px; }
 .bottom-right { bottom: 5px; right: 6px; transform: rotate(180deg); }
 
-.card-rank { font-size: 1.35rem; font-weight: bold; }
-.card-suit { font-size: 1.1rem; }
+.card-rank { font-size: 1.75rem; font-weight: bold; }
+.card-suit { font-size: 1.4rem; }
 .card-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
-.card-suit-large { font-size: 2.8rem; }
+.card-suit-large { font-size: 3.6rem; }
 
-.card.small .card-rank { font-size: 1.05rem; }
-.card.small .card-suit { font-size: 0.9rem; }
-.card.small .card-suit-large { font-size: 2rem; }
+.card.small .card-rank { font-size: 1.15rem; }
+.card.small .card-suit { font-size: 0.95rem; }
+.card.small .card-suit-large { font-size: 2.25rem; }
 
 /* ========== Hand Layout ========== */
 .hand {
@@ -771,44 +771,17 @@ body {
 .hand-left:not(.hand-fan) .hand-cards .card:first-child,
 .hand-right:not(.hand-fan) .hand-cards .card:first-child { margin-top: 0; }
 
-/* ---------- Fan variant: top (cards fan downward from a pivot above) ---------- */
+/* ---------- Fan variant: top (used for declarer hand when humanPlaysBoth) ----
+   Cards fan downward from a pivot above. In this fan the overlap hides
+   the upper portion of each card, so the visible corner is the bottom-right
+   (which normally has transform: rotate(180deg) so the opposing player can
+   read it). Un-rotate it here so the dummy-player sees an upright label. */
 .hand-fan.hand-top .hand-card-slot {
   top: var(--fan-bottom);
   bottom: auto;
   transform-origin: 50% -80%;
 }
-
-/* ---------- Fan variant: left/right (cards fan horizontally) ---------- */
-.hand-fan.hand-left .hand-cards,
-.hand-fan.hand-right .hand-cards {
-  width: var(--fan-height);
-  height: var(--fan-width);
-}
-.hand-fan.hand-left .hand-card-slot {
-  left: var(--fan-bottom);
-  right: auto;
-  top: 50%;
-  bottom: auto;
-  margin-left: 0;
-  margin-top: calc(var(--card-h) / -2);
-  transform-origin: -80% 50%;
-}
-.hand-fan.hand-right .hand-card-slot {
-  right: var(--fan-bottom);
-  left: auto;
-  top: 50%;
-  bottom: auto;
-  margin-left: 0;
-  margin-top: calc(var(--card-h) / -2);
-  transform-origin: 180% 50%;
-}
-
-/* In top and left fans the overlap hides the upper-left of each card,
-   so the bottom-right corner label is what's visible. It normally has
-   transform: rotate(180deg) (so the opposing player can read it); in
-   these fans we un-rotate it so the player sees an upright label. */
-.hand-fan.hand-top .card .bottom-right,
-.hand-fan.hand-left .card .bottom-right {
+.hand-fan.hand-top .card .bottom-right {
   transform: none;
 }
 
