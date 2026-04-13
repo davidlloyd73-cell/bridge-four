@@ -28,12 +28,14 @@
        >100% means the pivot is below the card, creating a fan with
        middle card highest and edge cards angled outward.
      - fan-bottom lifts cards off the container base so that rotated
-       edge cards don't clip off the bottom. */
+       edge cards don't clip off the bottom.
+     - fan-height is kept tight to the card so that the container
+       doesn't reserve wasted space above the visible arc. */
   --fan-spread: 60deg;
   --fan-pivot: 180%;
   --fan-bottom: calc(var(--card-h) * 0.3);
   --fan-width: calc(var(--card-h) * 2 + var(--card-w));
-  --fan-height: calc(var(--card-h) * 2);
+  --fan-height: calc(var(--card-h) * 1.35);
 }
 
 body {
@@ -340,7 +342,9 @@ body {
 .player-position { position: absolute; z-index: 5; }
 
 .pos-bottom {
-  bottom: 175px;
+  /* Sit just above the fanned hand so the label never overlaps cards.
+     Scales with card size: 10px hand-bottom + fan-height + small gap. */
+  bottom: calc(var(--fan-height) + 20px);
   left: 50%;
   transform: translateX(-50%);
 }
@@ -1523,7 +1527,7 @@ body {
 
   .bid-btn { width: 50px; height: 34px; font-size: 0.85rem; }
   .center-area { width: 95vw; }
-  .pos-bottom { bottom: 130px; }
+  /* pos-bottom uses the calc in the base rule — it scales with --fan-height */
 
   .trick-pos-bottom { bottom: 18%; }
   .trick-pos-top { top: 12%; }
@@ -1544,7 +1548,6 @@ body {
   .card-suit { font-size: 0.72rem; }
   .card-suit-large { font-size: 1.45rem; }
 
-  .pos-bottom { bottom: 90px; }
   .hand-bottom { bottom: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
 
   /* Compact bidding box */
@@ -1617,7 +1620,6 @@ body {
   .hand-bottom { bottom: 6px; }
 
   /* Player positions */
-  .pos-bottom { bottom: 80px; }
   .pos-top { top: 4px; }
   .pos-left { left: 2px; }
   .pos-right { right: 2px; }
