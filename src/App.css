@@ -1580,6 +1580,18 @@ body {
 }
 
 /* ========== Responsive ========== */
+/* Large desktop / iMac: bigger cards + a touch wider fan. */
+@media (min-width: 1400px) {
+  :root {
+    --card-w: 150px;
+    --card-h: 210px;
+    --fan-spread: 65deg;
+  }
+  .card-rank { font-size: 1.5rem; }
+  .card-suit { font-size: 1.1rem; }
+  .card-suit-large { font-size: 3.2rem; }
+}
+
 @media (max-width: 768px) {
   :root {
     --card-w: 70px;
@@ -2012,21 +2024,21 @@ body {
   text-align: center;
   padding: 0 0.5rem;
 }
-/* Video tile positions — the bottom tile is the local player. */
+/* Video tile positions — true-corner layout so tiles never sit on the
+   mid-axis where the compass player-info labels and fanned side-hands
+   live. Top-corner tiles sit 52px from the top to clear the top bar.
+   Bottom-left tile sits above .video-controls. */
 .video-tile.video-top {
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 52px;
+  right: 8px;
 }
 .video-tile.video-left {
-  top: 50%;
+  bottom: 52px;
   left: 8px;
-  transform: translateY(-50%);
 }
 .video-tile.video-right {
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
+  top: 52px;
+  left: 8px;
 }
 .video-tile.video-bottom {
   bottom: 8px;
@@ -2058,6 +2070,12 @@ body {
   background: #722;
   border-color: #a44;
 }
+@media (max-width: 1200px) {
+  .video-tile {
+    width: 140px;
+    height: 105px;
+  }
+}
 @media (max-width: 900px) {
   .video-tile {
     width: 110px;
@@ -2072,4 +2090,32 @@ body {
   .video-tile .tile-label {
     font-size: 0.65rem;
   }
+}
+
+/* ── Leave / Restart top-bar buttons ──────────────────────────────── */
+.leave-btn, .restart-btn {
+  background: #2a2a2a;
+  color: #ddd;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.restart-btn:hover {
+  background: #3a3a3a;
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.leave-btn {
+  background: #3a1a1a;
+  border-color: #7a3333;
+  color: #f5a5a5;
+}
+.leave-btn:hover {
+  background: #5a1a1a;
+  border-color: #c0392b;
+  color: #fff;
 }

@@ -54,7 +54,7 @@ const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣', NT: 'NT' };
 const SUIT_COLORS  = { S: 'black', H: 'red', D: 'red', C: 'black' };
 
 export default function GameTable({
-  gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, onReplayHand, onChoosePartnership, error
+  gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, onReplayHand, onChoosePartnership, onLeaveGame, onRestartGame, error
 }) {
   const [showScores, setShowScores] = useState(false);
   const [showLastTrick, setShowLastTrick] = useState(false);
@@ -158,6 +158,28 @@ export default function GameTable({
           </button>
           <button className="score-btn" onClick={() => setShowScores(true)}>
             Scores ({gameState.totalScores?.NS || 0} - {gameState.totalScores?.EW || 0})
+          </button>
+          <button
+            className="restart-btn"
+            onClick={() => {
+              if (window.confirm('Reset the game? All scores and partnerships will be cleared.')) {
+                onRestartGame?.();
+              }
+            }}
+            title="Reset the game back to partnership selection"
+          >
+            Restart
+          </button>
+          <button
+            className="leave-btn"
+            onClick={() => {
+              if (window.confirm('Leave the game? Your seat will open up for someone else.')) {
+                onLeaveGame?.();
+              }
+            }}
+            title="Leave this game and return to the lobby"
+          >
+            Leave
           </button>
         </div>
       </div>

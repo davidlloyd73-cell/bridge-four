@@ -503,6 +503,34 @@ io.on('connection', (socket) => {
     console.log(`New rubber started in ${currentGame.gameCode} — awaiting partnership selection`);
   });
 
+  // ── Leave game ─────────────────────────────────────────────────────
+  // Frees the seat (other players see it go empty); the socket stays
+  // connected so the client can return to the lobby.
+  socket.on('leave-game', (_, callback) => {
+    if (!currentGame) { callback?.({ error: 'Not in a game' }); return; }
+    const gameCode = currentGame.gameCode;
+    const removedSeat = removePlayer(currentGame, socket.id);
+    if (removedSeat) {
+      socket.leave(gameCode);
+      console.log(`${removedSeat} left ${gameCode} via Leave button`);
+      broadcastGameState(currentGame);
+    }
+    currentGame = null;
+    callback?.({ success: true });
+  });
+
+  // ── Restart game ───────────────────────────────────────────────────
+  // Full reset: wipes career individualScores and kicks everyone back to
+  // partnership selection. Any seated player can trigger.
+  socket.on('restart-game', (_, callback) => {
+    if (!currentGame) { callback?.({ error: 'Not in a game' }); return; }
+    startNewRubber(currentGame);
+    currentGame.individualScores = {};
+    callback?.({ success: true });
+    broadcastGameState(currentGame);
+    console.log(`Game restarted in ${currentGame.gameCode} — partnerships reset, scores cleared`);
+  });
+
   // ── WebRTC signalling relay ─────────────────────────────────────────
   // Forwards offer/answer/ICE candidates between the 4 players in a game.
   // Clients send { to: 'N'|'E'|'S'|'W', type, payload }; we look up the
