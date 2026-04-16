@@ -1583,13 +1583,23 @@ body {
 /* Large desktop / iMac: bigger cards + a touch wider fan. */
 @media (min-width: 1400px) {
   :root {
-    --card-w: 150px;
-    --card-h: 210px;
+    --card-w: 175px;
+    --card-h: 245px;
     --fan-spread: 65deg;
   }
-  .card-rank { font-size: 1.5rem; }
-  .card-suit { font-size: 1.1rem; }
-  .card-suit-large { font-size: 3.2rem; }
+  .card-rank { font-size: 1.7rem; }
+  .card-suit { font-size: 1.25rem; }
+  .card-suit-large { font-size: 3.6rem; }
+}
+/* Ultra-wide: push cards further so the felt isn't mostly empty. */
+@media (min-width: 1800px) {
+  :root {
+    --card-w: 200px;
+    --card-h: 280px;
+  }
+  .card-rank { font-size: 1.95rem; }
+  .card-suit { font-size: 1.4rem; }
+  .card-suit-large { font-size: 4.2rem; }
 }
 
 @media (max-width: 768px) {
@@ -1975,8 +1985,8 @@ body {
 }
 .video-tile {
   position: fixed;
-  width: 160px;
-  height: 120px;
+  width: 220px;
+  height: 165px;
   border: 2px solid var(--gold);
   border-radius: 10px;
   overflow: hidden;
@@ -2070,22 +2080,28 @@ body {
   background: #722;
   border-color: #a44;
 }
+@media (max-width: 1400px) {
+  .video-tile {
+    width: 180px;
+    height: 135px;
+  }
+}
 @media (max-width: 1200px) {
   .video-tile {
-    width: 140px;
-    height: 105px;
+    width: 150px;
+    height: 112px;
   }
 }
 @media (max-width: 900px) {
   .video-tile {
-    width: 110px;
-    height: 84px;
+    width: 120px;
+    height: 90px;
   }
 }
 @media (max-width: 600px) {
   .video-tile {
-    width: 84px;
-    height: 64px;
+    width: 90px;
+    height: 68px;
   }
   .video-tile .tile-label {
     font-size: 0.65rem;
