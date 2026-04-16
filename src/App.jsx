@@ -53,7 +53,13 @@ export default function App() {
 
     socket.on('connect', () => setConnected(true));
     socket.on('disconnect', () => setConnected(false));
-    socket.on('game-state', (state) => setGameState(state));
+    socket.on('game-state', (state) => {
+      setGameState(state);
+      // The server tags every game-state payload with the recipient's seat.
+      // Partnership rotation re-assigns seats mid-session, so keep mySeat
+      // in sync with whatever the server now says our seat is.
+      if (state?.mySeat) setMySeat(state.mySeat);
+    });
 
     return () => {
       socket.off('connect');
@@ -118,6 +124,13 @@ export default function App() {
     });
   }, []);
 
+  const choosePartnership = useCallback((pairing, done) => {
+    socket.emit('choose-partnership', pairing, (response) => {
+      if (response?.error) setError(response.error);
+      done?.();
+    });
+  }, []);
+
   if (!connected) {
     return (
       <div className="app connecting">
@@ -146,6 +159,7 @@ export default function App() {
         onNewRound={newRound}
         onAddBots={addBots}
         onReplayHand={replayHandAction}
+        onChoosePartnership={choosePartnership}
         error={error}
       />
     </ErrorBoundary>

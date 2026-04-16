@@ -48,22 +48,50 @@ export default function ScoreSheet({ scores, totalScores, individualScores, play
           </tfoot>
         </table>
 
-        {/* Individual Scores */}
+        {/* Individual Scores — keyed by player NAME so career totals
+            survive partnership rotation. Seats are shown for the CURRENT
+            rubber only. Any player from a prior rubber (still in
+            individualScores) is shown without a seat. */}
         {individualScores && (
           <div className="individual-scores">
             <h3>Individual Standings</h3>
             <div className="individual-grid">
-              {['N', 'E', 'S', 'W']
-                .map(seat => ({ seat, name: playerName(seat), score: individualScores[seat] || 0 }))
-                .sort((a, b) => b.score - a.score)
-                .map((p, idx) => (
-                  <div key={p.seat} className={`individual-row ${idx === 0 && scores.length > 0 ? 'leader' : ''}`}>
-                    <span className="individual-rank">{idx + 1}.</span>
-                    <span className="individual-name">{p.name}</span>
-                    <span className="individual-seat">({p.seat})</span>
-                    <span className="individual-score">{p.score}</span>
-                  </div>
-                ))}
+              {(() => {
+                const currentBySeat = ['N', 'E', 'S', 'W'].map(seat => ({
+                  seat,
+                  name: playerName(seat),
+                }));
+                const seen = new Set();
+                const rows = [];
+                for (const { seat, name } of currentBySeat) {
+                  if (!name || seen.has(name)) continue;
+                  seen.add(name);
+                  rows.push({
+                    seat,
+                    name,
+                    score: individualScores[name] || 0,
+                  });
+                }
+                // Include any players with historical scores not currently seated
+                for (const [name, score] of Object.entries(individualScores)) {
+                  if (seen.has(name)) continue;
+                  seen.add(name);
+                  rows.push({ seat: null, name, score });
+                }
+                return rows
+                  .sort((a, b) => b.score - a.score)
+                  .map((p, idx) => (
+                    <div
+                      key={p.name}
+                      className={`individual-row ${idx === 0 && scores.length > 0 ? 'leader' : ''}`}
+                    >
+                      <span className="individual-rank">{idx + 1}.</span>
+                      <span className="individual-name">{p.name}</span>
+                      {p.seat && <span className="individual-seat">({p.seat})</span>}
+                      <span className="individual-score">{p.score}</span>
+                    </div>
+                  ));
+              })()}
             </div>
           </div>
         )}

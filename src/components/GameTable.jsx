@@ -21,6 +21,9 @@ import BiddingBox, { BiddingHistory } from './BiddingBox';
 import TrickArea from './TrickArea';
 import ScoreSheet from './ScoreSheet';
 import DealReview from './DealReview';
+import PartnershipSelector from './PartnershipSelector';
+import VideoFeeds from './VideoFeeds';
+import { socket } from '../socket';
 
 const SEAT_NAMES = { N: 'North', E: 'East', S: 'South', W: 'West' };
 
@@ -51,12 +54,13 @@ const SUIT_SYMBOLS = { S: '♠', H: '♥', D: '♦', C: '♣', NT: 'NT' };
 const SUIT_COLORS  = { S: 'black', H: 'red', D: 'red', C: 'black' };
 
 export default function GameTable({
-  gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, onReplayHand, error
+  gameState, mySeat, myName, onStartGame, onBid, onPlayCard, onNextDeal, onNewRound, onAddBots, onReplayHand, onChoosePartnership, error
 }) {
   const [showScores, setShowScores] = useState(false);
   const [showLastTrick, setShowLastTrick] = useState(false);
   const [analysisText, setAnalysisText] = useState(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(false);
   const prevTrickLen = useRef(0);
   // Persist the last completed trick so players can recall it after it clears
   const savedLastTrick = useRef(null);
@@ -145,6 +149,13 @@ export default function GameTable({
               &#9654; Last Trick
             </button>
           )}
+          <button
+            className="score-btn"
+            onClick={() => setVideoEnabled(v => !v)}
+            title="Toggle video feeds"
+          >
+            {videoEnabled ? 'Video On' : 'Video Off'}
+          </button>
           <button className="score-btn" onClick={() => setShowScores(true)}>
             Scores ({gameState.totalScores?.NS || 0} - {gameState.totalScores?.EW || 0})
           </button>
@@ -200,8 +211,13 @@ export default function GameTable({
                 {Object.values(players).filter(p => p?.seated).length < 4 && (
                   <button className="start-btn" onClick={onAddBots}>Fill with Bots</button>
                 )}
-                {Object.values(players).filter(p => p?.seated).length === 4 && (
+                {Object.values(players).filter(p => p?.seated).length === 4 && !gameState.partnershipsPending && (
                   <button className="start-btn" onClick={onStartGame}>Deal First Hand</button>
+                )}
+                {gameState.partnershipsPending && (
+                  <p style={{ color: '#aaa', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                    Pick partnerships to start the rubber...
+                  </p>
                 )}
               </div>
             </div>
@@ -399,6 +415,36 @@ export default function GameTable({
           }}
         />
       )}
+
+      {/* Partnership selector overlay — shown whenever the server is
+          awaiting a partnership pick (new game with 4 humans, or start
+          of a new rubber after the previous one ended). */}
+      {gameState.partnershipsPending && phase === 'waiting' && (() => {
+        // If any individual scores exist we're at the start of a new rubber
+        // (career totals persist across rubbers). Otherwise it's a fresh game.
+        const isNewRubber = gameState.individualScores
+          && Object.keys(gameState.individualScores).length > 0;
+        return (
+          <PartnershipSelector
+            players={gameState.players}
+            myName={myName}
+            onChoose={onChoosePartnership}
+            title={isNewRubber ? 'Choose Partnerships for New Rubber' : 'Choose Partnerships'}
+            subtitle={Object.values(gameState.players || {}).filter(p => p?.seated).length === 4
+              ? undefined
+              : 'Waiting for all 4 players to join...'}
+          />
+        );
+      })()}
+
+      {/* Video feeds — 4 webcam tiles positioned around the table.
+          Off by default; the user toggles it on from the top bar. */}
+      <VideoFeeds
+        socket={socket}
+        mySeat={mySeat}
+        players={gameState.players}
+        enabled={videoEnabled}
+      />
 
       {/* Last trick overlay */}
       {showLastTrick && savedLastTrick.current && (
