@@ -131,6 +131,26 @@ export default function App() {
     });
   }, []);
 
+  const leaveGame = useCallback(() => {
+    socket.emit('leave-game', null, (response) => {
+      if (response?.error) {
+        setError(response.error);
+        return;
+      }
+      setInGame(false);
+      setMySeat(null);
+      setMyName('');
+      setGameState(null);
+      setError(null);
+    });
+  }, []);
+
+  const restartGame = useCallback(() => {
+    socket.emit('restart-game', null, (response) => {
+      if (response?.error) setError(response.error);
+    });
+  }, []);
+
   if (!connected) {
     return (
       <div className="app connecting">
@@ -160,6 +180,8 @@ export default function App() {
         onAddBots={addBots}
         onReplayHand={replayHandAction}
         onChoosePartnership={choosePartnership}
+        onLeaveGame={leaveGame}
+        onRestartGame={restartGame}
         error={error}
       />
     </ErrorBoundary>
