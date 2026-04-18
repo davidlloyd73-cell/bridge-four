@@ -1590,6 +1590,11 @@ body {
   .card-rank { font-size: 1.7rem; }
   .card-suit { font-size: 1.25rem; }
   .card-suit-large { font-size: 3.6rem; }
+  .hand-fan.hand-top {
+    transform: translateX(-50%) scale(0.72);
+    transform-origin: center top;
+    top: 80px;
+  }
 }
 /* Ultra-wide: push cards further so the felt isn't mostly empty. */
 @media (min-width: 1800px) {
@@ -1600,6 +1605,14 @@ body {
   .card-rank { font-size: 1.95rem; }
   .card-suit { font-size: 1.4rem; }
   .card-suit-large { font-size: 4.2rem; }
+  .hand-fan.hand-top {
+    transform: translateX(-50%) scale(0.65);
+    top: 70px;
+  }
+  .video-tile {
+    width: 280px;
+    height: 210px;
+  }
 }
 
 @media (max-width: 768px) {
