@@ -99,6 +99,7 @@ src/
 
 ## Recent changes
 
+- **2026-04-25** — Bidding layout fixes: panel lowered to clear North's info box; South's player-info visible during bidding; mobile panel raised to clear South's info box; play-status position tweaked
 - **2026-04-25** — Absolute compass layout: North always top, East right, South bottom, West left for all players; dummy column Ace-at-top with correct z-order; play-status moved above hand; trick-info moved to top-bar; card suit symbols enlarged
 - **2026-04-25** — Design improvements: bidding panel layout fixed (South's info no longer overlaps buttons), suit symbols enlarged and correctly coloured, trick-count box repositioned, video tiles enlarged
 - **2026-04-25** — Connection reliability: forced WebSocket transport, shorter ping interval, localStorage session auto-rejoin on reconnect, cold-start hint + Retry button

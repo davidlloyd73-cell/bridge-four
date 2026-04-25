@@ -960,11 +960,11 @@ body {
   50% { box-shadow: 0 0 20px rgba(46,204,113,0.6); }
 }
 
-/* During playing phase, move the status box above the player's hand so it
-   doesn't sit in the centre where trick cards are spread. */
+/* During playing phase, move the status box above the player's hand.
+   Clear fan-height + South player-info (~90px) + gap. */
 .phase-playing .center-area {
   top: auto;
-  bottom: calc(var(--fan-height) + 90px);
+  bottom: calc(var(--fan-height) + 120px);
   transform: translateX(-50%);
 }
 
@@ -1572,13 +1572,13 @@ body {
 /* ========== Bidding phase layout — all screens ========== */
 
 /* On all screens: pin the bidding area from the top, grow downward toward the hand.
-   History scrolls inside; bidding box always sticks to the bottom of the panel.
-   Leave 180px at the bottom: fan-height + player-info box + small gap. */
+   Start at 120px to clear North's player-info box (~8px top, ~100px tall).
+   Leave enough at the bottom for the fan + South's player-info + gap. */
 .phase-bidding .center-area {
-  top: 65px;
+  top: 120px;
   bottom: auto;
   transform: translateX(-50%);
-  max-height: calc(100% - 65px - var(--fan-height) - 180px);
+  max-height: calc(100% - 120px - var(--fan-height) - 110px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1610,12 +1610,12 @@ body {
   .phase-bidding .pos-left  { top: 68px; transform: none; }
   .phase-bidding .pos-right { top: 68px; transform: none; }
 
-  /* Slide the panel up from above the hand */
+  /* Slide the panel up, clearing South's player-info (~90px above the fan) */
   .phase-bidding .center-area {
     top: auto;
-    bottom: calc(var(--fan-height) + 10px);
+    bottom: calc(var(--fan-height) + 110px);
     transform: translateX(-50%);
-    max-height: calc(100dvh - var(--fan-height) - 160px);
+    max-height: calc(100dvh - var(--fan-height) - 290px);
     background: rgba(10,30,10,0.97);
     border-radius: 14px 14px 0 0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
