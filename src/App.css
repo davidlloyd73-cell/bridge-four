@@ -506,8 +506,8 @@ body {
 }
 
 .bid-btn {
-  width: 62px;
-  height: 42px;
+  width: 68px;
+  height: 48px;
   border: 1px solid #555;
   border-radius: 6px;
   background: #2a2a2a;
@@ -517,19 +517,28 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   transition: all 0.15s;
 }
 .bid-btn:hover:not(:disabled) { background: #3a3a3a; border-color: var(--gold); }
 .bid-btn.disabled, .bid-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 
 .bid-level { font-weight: bold; font-size: 1.05rem; }
-.bid-suit-sym { font-size: 1.1rem; }
-.bid-suit-sym.green { color: #2ecc71; }
-.bid-suit-sym.orange { color: #e67e22; }
-.bid-suit-sym.red { color: #e74c3c; }
-.bid-suit-sym.blue { color: #3498db; }
-.bid-suit-sym.black { color: #fff; }
+.bid-suit-sym { font-size: 1.5rem; line-height: 1; }
+/* Bridge colour convention: ♥♦ red, ♣♠ near-white (black on dark bg), NT soft blue */
+.bid-suit-sym.suit-red   { color: #e74c3c; }
+.bid-suit-sym.suit-black { color: #f0f0f0; }
+.bid-suit-sym.suit-nt    { color: #a8c8ff; font-size: 1.1rem; }
+
+/* Coloured suit symbols inside bidding history cells */
+.suit-red   { color: #e74c3c; font-size: 1.1em; }
+.suit-black { color: #f0f0f0; font-size: 1.1em; }
+
+/* Bid history cell styles */
+.hist-pass  { color: #888; }
+.hist-dbl   { color: #e74c3c; font-weight: bold; }
+.hist-rdbl  { color: #a569bd; font-weight: bold; }
+.hist-bid   { font-weight: bold; color: #fff; }
 
 .bid-actions {
   display: flex;
@@ -569,14 +578,15 @@ body {
 
 .trick-info {
   position: absolute;
-  top: 38%;
+  top: 60px;          /* just below the North player-info, never overlaps play-status */
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   text-align: center;
   pointer-events: none;
-  background: rgba(0,0,0,0.45);
-  padding: 0.5rem 1.2rem;
+  background: rgba(0,0,0,0.55);
+  padding: 0.4rem 1.2rem;
   border-radius: 8px;
+  z-index: 4;
 }
 
 .contract-display {
@@ -1549,29 +1559,63 @@ body {
 }
 .last-trick-close:hover { background: #3a3a50; }
 
-/* ========== Bidding phase mobile layout ========== */
+/* ========== Bidding phase layout — all screens ========== */
+
+/* South's player-info box disappears during bidding so it can't sit on the bid buttons */
+.phase-bidding .pos-bottom { display: none; }
+
+/* On all screens: pin the bidding area from the top, grow downward toward the hand.
+   History scrolls inside; bidding box always sticks to the bottom of the panel. */
+.phase-bidding .center-area {
+  top: 65px;
+  bottom: auto;
+  transform: translateX(-50%);
+  max-height: calc(100% - 65px - var(--fan-height) - 100px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.phase-bidding .bidding-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;  /* essential: lets flex children shrink below their natural height */
+  overflow: hidden;
+}
+
+/* History fills available space and scrolls when long */
+.phase-bidding .bidding-history {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-bottom: 0.5rem;
+}
+
+/* Bidding box stays pinned at the bottom of the panel */
+.phase-bidding .bidding-box {
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
-  /* E/W panels → top corners, South hidden (would cover Pass/Double buttons) */
+  /* E/W panels → top corners on mobile */
   .phase-bidding .pos-left  { top: 68px; transform: none; }
   .phase-bidding .pos-right { top: 68px; transform: none; }
-  .phase-bidding .pos-bottom { display: none; }
 
-  /* Bidding history not needed on mobile — hides a ~80px table saving critical space */
-  .phase-bidding .bidding-history { display: none; }
-
-  /* Float the bid panel above the player's hand (hand-bottom is ~85px tall) */
+  /* Slide the panel up from above the hand */
   .phase-bidding .center-area {
     top: auto;
-    bottom: 88px;
+    bottom: calc(var(--fan-height) + 10px);
     transform: translateX(-50%);
-    max-height: calc(100dvh - 230px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    max-height: calc(100dvh - var(--fan-height) - 160px);
     background: rgba(10,30,10,0.97);
     border-radius: 14px 14px 0 0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
   }
-  /* Compact layout — don't override button sizes (let 480px/375px breakpoints do that) */
+
+  /* History visible on mobile (scrollable) */
+  .phase-bidding .bidding-history { display: block; }
+
   .phase-bidding .bidding-box { padding: 0.5rem; }
   .phase-bidding .bidding-box h3 { font-size: 0.9rem; margin-bottom: 0.3rem; }
   .phase-bidding .bid-grid { gap: 3px; margin-bottom: 0.4rem; }
@@ -1609,10 +1653,6 @@ body {
     transform: translateX(-50%) scale(0.65);
     top: 70px;
   }
-  .video-tile {
-    width: 280px;
-    height: 210px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -1628,7 +1668,8 @@ body {
   .card-suit { font-size: 0.88rem; }
   .card-suit-large { font-size: 1.9rem; }
 
-  .bid-btn { width: 50px; height: 34px; font-size: 0.85rem; }
+  .bid-btn { width: 54px; height: 38px; font-size: 0.85rem; }
+  .bid-suit-sym { font-size: 1.2rem; }
   .center-area { width: 95vw; }
   /* pos-bottom uses the calc in the base rule — it scales with --fan-height */
 
@@ -1998,8 +2039,8 @@ body {
 }
 .video-tile {
   position: fixed;
-  width: 220px;
-  height: 165px;
+  width: 280px;
+  height: 210px;
   border: 2px solid var(--gold);
   border-radius: 10px;
   overflow: hidden;
@@ -2094,31 +2135,17 @@ body {
   border-color: #a44;
 }
 @media (max-width: 1400px) {
-  .video-tile {
-    width: 180px;
-    height: 135px;
-  }
+  .video-tile { width: 230px; height: 173px; }
 }
 @media (max-width: 1200px) {
-  .video-tile {
-    width: 150px;
-    height: 112px;
-  }
+  .video-tile { width: 190px; height: 143px; }
 }
 @media (max-width: 900px) {
-  .video-tile {
-    width: 120px;
-    height: 90px;
-  }
+  .video-tile { width: 155px; height: 116px; }
 }
 @media (max-width: 600px) {
-  .video-tile {
-    width: 90px;
-    height: 68px;
-  }
-  .video-tile .tile-label {
-    font-size: 0.65rem;
-  }
+  .video-tile { width: 120px; height: 90px; }
+  .video-tile .tile-label { font-size: 0.65rem; }
 }
 
 /* ── Leave / Restart top-bar buttons ──────────────────────────────── */

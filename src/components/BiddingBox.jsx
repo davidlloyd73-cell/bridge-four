@@ -1,19 +1,23 @@
 import React from 'react';
 
+const SUIT_SYM = { C: '♣', D: '♦', H: '♥', S: '♠' };
+
+// Bridge colour convention: hearts & diamonds red, clubs & spades black.
+// On the dark background "black" suits render as near-white so they're readable.
 const SUIT_DISPLAY = {
-  C: { symbol: '♣', color: 'green' },
-  D: { symbol: '♦', color: 'orange' },
-  H: { symbol: '♥', color: 'red' },
-  S: { symbol: '♠', color: 'blue' },
-  NT: { symbol: 'NT', color: 'black' },
+  C:  { symbol: '♣', color: 'suit-black' },
+  D:  { symbol: '♦', color: 'suit-red'   },
+  H:  { symbol: '♥', color: 'suit-red'   },
+  S:  { symbol: '♠', color: 'suit-black' },
+  NT: { symbol: 'NT', color: 'suit-nt'   },
 };
 
-export default function BiddingBox({ validBids, onBid, biddingHistory, dealer }) {
+export default function BiddingBox({ validBids, onBid }) {
   if (!validBids) return null;
 
   const canBid = (level, suit) =>
     validBids.some(b => b.type === 'bid' && b.level === level && b.suit === suit);
-  const canDouble = validBids.some(b => b.type === 'double');
+  const canDouble   = validBids.some(b => b.type === 'double');
   const canRedouble = validBids.some(b => b.type === 'redouble');
 
   return (
@@ -24,7 +28,7 @@ export default function BiddingBox({ validBids, onBid, biddingHistory, dealer })
           <div key={level} className="bid-row">
             {['C', 'D', 'H', 'S', 'NT'].map(suit => {
               const available = canBid(level, suit);
-              const display = SUIT_DISPLAY[suit];
+              const { symbol, color } = SUIT_DISPLAY[suit];
               return (
                 <button
                   key={`${level}${suit}`}
@@ -33,7 +37,7 @@ export default function BiddingBox({ validBids, onBid, biddingHistory, dealer })
                   onClick={() => onBid({ type: 'bid', level, suit })}
                 >
                   <span className="bid-level">{level}</span>
-                  <span className={`bid-suit-sym ${display.color}`}>{display.symbol}</span>
+                  <span className={`bid-suit-sym ${color}`}>{symbol}</span>
                 </button>
               );
             })}
@@ -49,14 +53,14 @@ export default function BiddingBox({ validBids, onBid, biddingHistory, dealer })
           disabled={!canDouble}
           onClick={() => onBid({ type: 'double' })}
         >
-          Double
+          Dbl
         </button>
         <button
           className={`bid-action redouble ${!canRedouble ? 'disabled' : ''}`}
           disabled={!canRedouble}
           onClick={() => onBid({ type: 'redouble' })}
         >
-          Redouble
+          Rdbl
         </button>
       </div>
     </div>
@@ -70,21 +74,18 @@ export function BiddingHistory({ bids, dealer }) {
   const dealerIdx = seatOrder.indexOf(dealer);
   const orderedSeats = [...seatOrder.slice(dealerIdx), ...seatOrder.slice(0, dealerIdx)];
 
-  // Build bid table
+  // Build rows of raw bid objects (null = empty cell)
   const rows = [];
   let currentRow = new Array(4).fill(null);
   let col = 0;
 
   for (const bid of bids) {
-    const seatIdx = orderedSeats.indexOf(bid.seat);
-    // If this is the first bid, add empty cells for seats before dealer
-    if (rows.length === 0 && col === 0 && seatIdx > 0) {
-      for (let i = 0; i < seatIdx; i++) {
-        currentRow[i] = '-';
-        col++;
-      }
+    // First bid: skip to its column position
+    if (rows.length === 0 && col === 0) {
+      const seatIdx = orderedSeats.indexOf(bid.seat);
+      if (seatIdx > 0) col = seatIdx;
     }
-    currentRow[col] = formatBidDisplay(bid);
+    currentRow[col] = bid;
     col++;
     if (col >= 4) {
       rows.push(currentRow);
@@ -105,9 +106,9 @@ export function BiddingHistory({ bids, dealer }) {
         <tbody>
           {rows.map((row, i) => (
             <tr key={i}>
-              {row.map((cell, j) => (
-                <td key={j} className={cell === 'Pass' ? 'pass-bid' : ''}>
-                  {cell || ''}
+              {row.map((bid, j) => (
+                <td key={j}>
+                  {bid && <BidCell bid={bid} />}
                 </td>
               ))}
             </tr>
@@ -118,14 +119,19 @@ export function BiddingHistory({ bids, dealer }) {
   );
 }
 
-const SUIT_SYM = { C: '♣', D: '♦', H: '♥', S: '♠' };
-
-function formatBidDisplay(bid) {
-  switch (bid.type) {
-    case 'pass': return 'Pass';
-    case 'double': return 'Dbl';
-    case 'redouble': return 'Rdbl';
-    case 'bid': return `${bid.level}${SUIT_SYM[bid.suit] || bid.suit}`;
-    default: return '?';
+function BidCell({ bid }) {
+  if (bid.type === 'pass')     return <span className="hist-pass">Pass</span>;
+  if (bid.type === 'double')   return <span className="hist-dbl">Dbl</span>;
+  if (bid.type === 'redouble') return <span className="hist-rdbl">Rdbl</span>;
+  if (bid.type === 'bid') {
+    const sym   = SUIT_SYM[bid.suit] || bid.suit;
+    const isRed = bid.suit === 'H' || bid.suit === 'D';
+    return (
+      <span className="hist-bid">
+        {bid.level}
+        <span className={isRed ? 'suit-red' : 'suit-black'}>{sym}</span>
+      </span>
+    );
   }
+  return null;
 }

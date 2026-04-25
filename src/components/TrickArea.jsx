@@ -49,7 +49,7 @@ export default function TrickArea({ currentTrick, lastCompletedTrick, mySeat, co
 
   return (
     <div className="trick-area-overlay">
-      {/* Contract + trick count header */}
+      {/* Contract + trick count — anchored near top, never overlaps centre */}
       <div className="trick-info">
         {contract && (
           <div className="contract-display">
