@@ -16,6 +16,9 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
+  transports: ['websocket'],
+  pingInterval: 10000,   // ping clients every 10 s — well under Render's 30 s proxy timeout
+  pingTimeout: 5000,
 });
 
 // In production, serve the built React app

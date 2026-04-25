@@ -40,6 +40,8 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+const SESSION_KEY = 'bridge4-session';
+
 export default function App() {
   const [connected, setConnected] = useState(false);
   const [inGame, setInGame] = useState(false);
@@ -51,7 +53,31 @@ export default function App() {
   useEffect(() => {
     socket.connect();
 
-    socket.on('connect', () => setConnected(true));
+    socket.on('connect', () => {
+      setConnected(true);
+      // Auto-rejoin if the socket dropped mid-game (new socket ID, same session)
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (saved) {
+        try {
+          const { gameCode, name, seat } = JSON.parse(saved);
+          socket.emit('join-game', { gameCode, name, seat }, (response) => {
+            if (response.error) {
+              localStorage.removeItem(SESSION_KEY);
+              setInGame(false);
+              setMySeat(null);
+              setMyName('');
+              setGameState(null);
+            } else {
+              setInGame(true);
+              setMySeat(seat);
+              setMyName(name);
+            }
+          });
+        } catch {
+          localStorage.removeItem(SESSION_KEY);
+        }
+      }
+    });
     socket.on('disconnect', () => setConnected(false));
     socket.on('game-state', (state) => {
       setGameState(state);
@@ -72,6 +98,7 @@ export default function App() {
       if (response.error) {
         setError(response.error);
       } else {
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ gameCode, name, seat }));
         setInGame(true);
         setMySeat(response.seat);
         setMyName(name);
@@ -134,6 +161,7 @@ export default function App() {
         setError(response.error);
         return;
       }
+      localStorage.removeItem(SESSION_KEY);
       setInGame(false);
       setMySeat(null);
       setMyName('');
@@ -145,6 +173,7 @@ export default function App() {
   const restartGame = useCallback(() => {
     socket.emit('restart-game', null, (response) => {
       if (response?.error) setError(response.error);
+      else localStorage.removeItem(SESSION_KEY);
     });
   }, []);
 
@@ -154,6 +183,15 @@ export default function App() {
         <div className="logo">
           <h1>Bridge Four</h1>
           <p>Connecting to server...</p>
+          <p style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.5rem' }}>
+            Server may be waking up — this can take up to 30 seconds
+          </p>
+          <button
+            onClick={() => socket.connect()}
+            style={{ marginTop: '1rem', padding: '0.4rem 1rem', cursor: 'pointer' }}
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
