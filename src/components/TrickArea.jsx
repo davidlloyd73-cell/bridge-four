@@ -45,34 +45,13 @@ export default function TrickArea({ currentTrick, lastCompletedTrick, mySeat, co
     };
   }, [currentTrick, lastCompletedTrick]);
 
-  const seatToPosition = (RELATIVE_POSITIONS[mySeat] || RELATIVE_POSITIONS.S);
+  const COMPASS = { N: 'top', E: 'right', S: 'bottom', W: 'left' };
 
   return (
     <div className="trick-area-overlay">
-      {/* Contract + trick count — anchored near top, never overlaps centre */}
-      <div className="trick-info">
-        {contract && (
-          <div className="contract-display">
-            <span className="contract-text">
-              {contract.level}{formatSuit(contract.suit)}
-              {contract.doubled ? ' X' : ''}
-              {contract.redoubled ? ' XX' : ''}
-            </span>
-            <span className="contract-by"> by {contract.declarer}</span>
-          </div>
-        )}
-        {tricksWon && (
-          <div className="trick-count">
-            <span>Trick {trickNumber}/13</span>
-            <span className="tricks-ns">NS: {tricksWon.NS}</span>
-            <span className="tricks-ew">EW: {tricksWon.EW}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Trick cards spread near each player */}
+      {/* Trick cards spread near each player — absolute compass positions */}
       {displayedTrick.map(({ seat, card }) => {
-        const pos = seatToPosition[seat];
+        const pos = COMPASS[seat] || 'bottom';
         const isWinner = trickWinner === seat;
         return (
           <div key={seat} className={`trick-card-spread trick-pos-${pos} ${isWinner ? 'trick-winner' : ''}`}>
@@ -84,17 +63,3 @@ export default function TrickArea({ currentTrick, lastCompletedTrick, mySeat, co
   );
 }
 
-// Rotate so mySeat is always at the bottom of the table view
-const RELATIVE_POSITIONS = {
-  S: { N: 'top',    E: 'right', S: 'bottom', W: 'left'   },
-  W: { N: 'left',   E: 'top',   S: 'right',  W: 'bottom' },
-  N: { N: 'bottom', E: 'left',  S: 'top',    W: 'right'  },
-  E: { N: 'right',  E: 'bottom',S: 'left',   W: 'top'    },
-};
-
-const SUIT_SYMBOLS = { C: '&#9827;', D: '&#9830;', H: '&#9829;', S: '&#9824;', NT: 'NT' };
-const SUIT_DISPLAY = { C: '\u2663', D: '\u2666', H: '\u2665', S: '\u2660', NT: 'NT' };
-
-function formatSuit(suit) {
-  return SUIT_DISPLAY[suit] || suit;
-}

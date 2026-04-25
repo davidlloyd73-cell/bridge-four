@@ -321,6 +321,8 @@ body {
 .deal-info { color: #ccc; }
 .vul-info { color: #8f8; }
 .vul-info.vul { color: var(--red); font-weight: bold; }
+.contract-info { color: #fff; font-weight: bold; font-size: 1.05rem; }
+.tricks-info { color: #bbb; font-size: 0.95rem; }
 
 .score-btn {
   padding: 0.5rem 1.2rem;
@@ -698,14 +700,14 @@ body {
 .bottom-right { bottom: 5px; right: 6px; transform: rotate(180deg); }
 
 .card-rank { font-size: 1.75rem; font-weight: bold; }
-.card-suit { font-size: 1.4rem; }
+.card-suit { font-size: 1.65rem; }
 .card-center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
-.card-suit-large { font-size: 3.6rem; }
+.card-suit-large { font-size: 4rem; }
 
 .card.small .card-rank { font-size: 1.15rem; }
 .card.small .card-suit { font-size: 0.95rem; }
@@ -956,6 +958,14 @@ body {
 @keyframes pulseGlow {
   0%, 100% { box-shadow: 0 0 8px rgba(46,204,113,0.3); }
   50% { box-shadow: 0 0 20px rgba(46,204,113,0.6); }
+}
+
+/* During playing phase, move the status box above the player's hand so it
+   doesn't sit in the centre where trick cards are spread. */
+.phase-playing .center-area {
+  top: auto;
+  bottom: calc(var(--fan-height) + 90px);
+  transform: translateX(-50%);
 }
 
 /* ========== Hand Complete / Round Complete ========== */
@@ -1561,16 +1571,14 @@ body {
 
 /* ========== Bidding phase layout — all screens ========== */
 
-/* South's player-info box disappears during bidding so it can't sit on the bid buttons */
-.phase-bidding .pos-bottom { display: none; }
-
 /* On all screens: pin the bidding area from the top, grow downward toward the hand.
-   History scrolls inside; bidding box always sticks to the bottom of the panel. */
+   History scrolls inside; bidding box always sticks to the bottom of the panel.
+   Leave 180px at the bottom: fan-height + player-info box + small gap. */
 .phase-bidding .center-area {
   top: 65px;
   bottom: auto;
   transform: translateX(-50%);
-  max-height: calc(100% - 65px - var(--fan-height) - 100px);
+  max-height: calc(100% - 65px - var(--fan-height) - 180px);
   display: flex;
   flex-direction: column;
   overflow: hidden;

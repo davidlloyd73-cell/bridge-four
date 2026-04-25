@@ -24,8 +24,8 @@ export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, posit
 
   // large = player's own hand (always full-size). Dummy uses the grid layout.
   const useSmall = large ? false : position !== 'bottom';
-  // Fan layout for the player's own hand (always at the bottom).
-  const isFan = !!large;
+  // Fan only for top/bottom positions — side positions use a simple stack.
+  const isFan = !!large && (position === 'bottom' || position === 'top');
   const count = cards.length;
 
   // Dummy is laid out as 4 columns (one per suit), trumps leftmost.
@@ -40,7 +40,7 @@ export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, posit
       suit,
       cards: cards
         .filter(c => c.suit === suit)
-        .sort((a, b) => RANK_VALUE[a.rank] - RANK_VALUE[b.rank]),
+        .sort((a, b) => RANK_VALUE[b.rank] - RANK_VALUE[a.rank]),
     }));
 
     return (
@@ -52,8 +52,8 @@ export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, posit
               {col.cards.length === 0 ? (
                 <div className="dummy-empty">—</div>
               ) : (
-                col.cards.map(card => (
-                  <div key={`${card.rank}${card.suit}`} className="dummy-slot">
+                col.cards.map((card, idx) => (
+                  <div key={`${card.rank}${card.suit}`} className="dummy-slot" style={{ position: 'relative', zIndex: idx + 1 }}>
                     <Card
                       card={card}
                       playable={canPlay(card)}

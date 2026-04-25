@@ -1,20 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 
-// Relative compass: mySeat is always at the bottom, with the other seats
-// rotated around it (partner across = top, LHO/RHO at the sides).
-//   mySeat=S: { N: top,    E: right, S: bottom, W: left   }  (no rotation)
-//   mySeat=W: { N: left,   E: top,   S: right,  W: bottom }
-//   mySeat=N: { N: bottom, E: left,  S: top,    W: right  }
-//   mySeat=E: { N: right,  E: bottom,S: left,   W: top    }
-const RELATIVE_POSITIONS = {
-  S: { N: 'top',    E: 'right', S: 'bottom', W: 'left'   },
-  W: { N: 'left',   E: 'top',   S: 'right',  W: 'bottom' },
-  N: { N: 'bottom', E: 'left',  S: 'top',    W: 'right'  },
-  E: { N: 'right',  E: 'bottom',S: 'left',   W: 'top'    },
-};
-function getPosition(seat, mySeat) {
-  return (RELATIVE_POSITIONS[mySeat] || RELATIVE_POSITIONS.S)[seat];
-}
+// Absolute compass: North is always at the top, South at the bottom,
+// East at the right, West at the left — regardless of which seat you occupy.
+const COMPASS = { N: 'top', E: 'right', S: 'bottom', W: 'left' };
+function getPosition(seat) { return COMPASS[seat] || 'bottom'; }
 import Hand from './Hand';
 import Card from './Card';
 import BiddingBox, { BiddingHistory } from './BiddingBox';
@@ -141,6 +130,22 @@ export default function GameTable({
           <span className={`vul-info ${vulnerability?.EW ? 'vul' : ''}`}>
             EW: {vulnerability?.EW ? 'VUL' : 'NV'}
           </span>
+          {phase === 'playing' && gameState.contract && (
+            <>
+              <span className="contract-info">
+                {gameState.contract.level}
+                <span className={gameState.contract.suit === 'H' || gameState.contract.suit === 'D' ? 'suit-red' : 'suit-black'}>
+                  {SUIT_SYMBOLS[gameState.contract.suit]}
+                </span>
+                {gameState.contract.doubled ? 'X' : ''}{gameState.contract.redoubled ? 'XX' : ''}
+                {' by '}{SEAT_NAMES[gameState.contract.declarer]}
+              </span>
+              <span className="tricks-info">
+                NS {gameState.tricksWon?.NS ?? 0}–EW {gameState.tricksWon?.EW ?? 0}
+                {' · Trick '}{gameState.trickNumber}/13
+              </span>
+            </>
+          )}
         </div>
         <div className="top-actions">
           {savedLastTrick.current && phase === 'playing' && (
@@ -186,29 +191,30 @@ export default function GameTable({
 
       {/* Game table */}
       <div className={`table phase-${phase}`}>
-        {/* Player positions — mySeat is always at the bottom, others rotated around */}
+        {/* Player positions — absolute compass: North top, South bottom, East right, West left */}
         {['N', 'E', 'S', 'W'].map((seat) => {
-          const pos = getPosition(seat, mySeat);
+          const pos = getPosition(seat);
           const player = players[seat];
           const isDealer = seat === dealer;
           const isCurrentTurn = seat === gameState.currentTurn;
           const seatTeam = getTeam(seat);
           const isPartner = seat !== mySeat && getTeam(seat) === getTeam(mySeat);
+          const isSelf = seat === mySeat;
 
           return (
             <div key={seat} className={`player-position pos-${pos}`}>
               <div className={`player-info ${isCurrentTurn ? 'active-turn' : ''} ${
-                vulnerability?.[seatTeam] ? 'vulnerable' : ''}`}>
+                vulnerability?.[seatTeam] ? 'vulnerable' : ''} ${isSelf ? 'self' : ''}`}>
                 <span className="player-name">
                   {player?.name || `(${SEAT_NAMES[seat]})`}
                   {isPartner && ' *'}
                 </span>
                 <span className="player-seat">{SEAT_NAMES[seat]}</span>
                 {isDealer && <span className="dealer-badge">D</span>}
-                {seat === mySeat && gameState.myHCP !== undefined && (
+                {isSelf && gameState.myHCP !== undefined && (
                   <span className="hcp-badge">{gameState.myHCP} HCP</span>
                 )}
-                {gameState.handSizes?.[seat] > 0 && pos !== 'bottom' && (
+                {gameState.handSizes?.[seat] > 0 && !isSelf && (
                   <span className="card-count">{gameState.handSizes[seat]} cards</span>
                 )}
               </div>
@@ -347,7 +353,7 @@ export default function GameTable({
             onPlayCard={onPlayCard}
             isMyTurn={(gameState.currentTurn === mySeat && phase === 'playing') || false}
             playableCards={playableCards}
-            position={getPosition(mySeat, mySeat)}
+            position={getPosition(mySeat)}
             isDummy={humanPlaysBoth}
             large
           />
@@ -360,7 +366,7 @@ export default function GameTable({
             onPlayCard={onPlayCard}
             isMyTurn={gameState.currentTurn === gameState.declarerSeat && phase === 'playing'}
             playableCards={declarerPlayableCards}
-            position={getPosition(gameState.declarerSeat, mySeat)}
+            position={getPosition(gameState.declarerSeat)}
             large
           />
         )}
@@ -378,7 +384,7 @@ export default function GameTable({
               gameState.contract?.declarer === mySeat && gameState.declarerControlsDummy
             }
             playableCards={dummyPlayableCards}
-            position={getPosition(gameState.dummySeat, mySeat)}
+            position={getPosition(gameState.dummySeat)}
             isDummy
             trumpSuit={gameState.contract?.suit}
           />
