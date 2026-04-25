@@ -22,10 +22,11 @@ export default function Hand({ cards, onPlayCard, isMyTurn, playableCards, posit
     return playableCards.some(pc => pc.suit === card.suit && pc.rank === card.rank);
   };
 
-  // large = player's own hand (always full-size). Dummy uses the grid layout.
-  const useSmall = large ? false : position !== 'bottom';
-  // Fan only for top/bottom positions — side positions use a simple stack.
-  const isFan = !!large && (position === 'bottom' || position === 'top');
+  // Fan only at the bottom — the South player (or whoever sits at bottom) gets
+  // the full spread. North/East/West own-hand shows as a compact overlapping row.
+  const isFan = !!large && position === 'bottom';
+  // Full-size cards for the fan; small for everything else.
+  const useSmall = large ? !isFan : position !== 'bottom';
   const count = cards.length;
 
   // Dummy is laid out as 4 columns (one per suit), trumps leftmost.

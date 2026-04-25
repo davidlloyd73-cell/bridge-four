@@ -352,6 +352,13 @@ body {
   left: 50%;
   transform: translateX(-50%);
 }
+/* When the local player is NOT South, there is no fan at the bottom —
+   South's player-info sits near the bottom edge with a small gap only. */
+.seat-N .pos-bottom,
+.seat-E .pos-bottom,
+.seat-W .pos-bottom {
+  bottom: 20px;
+}
 .pos-top {
   top: 8px;
   left: 50%;
@@ -960,12 +967,19 @@ body {
   50% { box-shadow: 0 0 20px rgba(46,204,113,0.6); }
 }
 
-/* During playing phase, move the status box above the player's hand.
-   Clear fan-height + South player-info (~90px) + gap. */
-.phase-playing .center-area {
+/* South player: move play-status above the fan hand at the bottom */
+.seat-S.phase-playing .center-area {
   top: auto;
   bottom: calc(var(--fan-height) + 120px);
   transform: translateX(-50%);
+}
+/* North/East/West: status stays centred (no fan at bottom to avoid) */
+.seat-N.phase-playing .center-area,
+.seat-E.phase-playing .center-area,
+.seat-W.phase-playing .center-area {
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
 }
 
 /* ========== Hand Complete / Round Complete ========== */
@@ -1603,6 +1617,13 @@ body {
 /* Bidding box stays pinned at the bottom of the panel */
 .phase-bidding .bidding-box {
   flex-shrink: 0;
+}
+
+/* North-seated player: own compact hand occupies top 120–240px, so drop
+   the bidding panel below it. South's info is at bottom:20px (no fan there). */
+.seat-N.phase-bidding .center-area {
+  top: 260px;
+  max-height: calc(100% - 260px - 130px);
 }
 
 @media (max-width: 768px) {
