@@ -58,11 +58,6 @@ export default function GameTable({
     savedLastTrick.current = gameState.lastCompletedTrick;
   }
 
-  // Reset partnership UI when the phase moves away from waiting
-  useEffect(() => {
-    if (phase !== 'waiting') setShowingPartnershipUI(false);
-  }, [phase]);
-
   // Play a card-snap sound whenever ANY player plays a card
   useEffect(() => {
     const trick = gameState?.currentTrick;
@@ -74,6 +69,11 @@ export default function GameTable({
   }, [gameState?.currentTrick]);
 
   const phase = gameState?.phase;
+
+  // Reset partnership UI when the phase moves away from waiting
+  useEffect(() => {
+    if (phase !== 'waiting') setShowingPartnershipUI(false);
+  }, [phase]);
 
   // Hooks must always be called in the same order (Rules of Hooks)
   // so these must come BEFORE any early returns
