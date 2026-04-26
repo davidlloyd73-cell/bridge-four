@@ -47,6 +47,7 @@ export default function GameTable({
 }) {
   const [showScores, setShowScores] = useState(false);
   const [showLastTrick, setShowLastTrick] = useState(false);
+  const [showingPartnershipUI, setShowingPartnershipUI] = useState(false);
   const [analysisText, setAnalysisText] = useState(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
@@ -56,6 +57,11 @@ export default function GameTable({
   if (gameState?.lastCompletedTrick) {
     savedLastTrick.current = gameState.lastCompletedTrick;
   }
+
+  // Reset partnership UI when the phase moves away from waiting
+  useEffect(() => {
+    if (phase !== 'waiting') setShowingPartnershipUI(false);
+  }, [phase]);
 
   // Play a card-snap sound whenever ANY player plays a card
   useEffect(() => {
@@ -242,9 +248,14 @@ export default function GameTable({
                 {Object.values(players).filter(p => p?.seated).length === 4 && !gameState.partnershipsPending && (
                   <button className="start-btn" onClick={onStartGame}>Deal First Hand</button>
                 )}
-                {gameState.partnershipsPending && (
+                {gameState.partnershipsPending && Object.values(players).filter(p => p?.seated).length === 4 && (
+                  <button className="start-btn" onClick={() => setShowingPartnershipUI(true)}>
+                    Choose Partnerships
+                  </button>
+                )}
+                {gameState.partnershipsPending && Object.values(players).filter(p => p?.seated).length < 4 && (
                   <p style={{ color: '#aaa', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                    Pick partnerships to start the rubber...
+                    Waiting for all 4 players to join...
                   </p>
                 )}
               </div>
@@ -447,7 +458,7 @@ export default function GameTable({
       {/* Partnership selector overlay — shown whenever the server is
           awaiting a partnership pick (new game with 4 humans, or start
           of a new rubber after the previous one ended). */}
-      {gameState.partnershipsPending && phase === 'waiting' && (() => {
+      {gameState.partnershipsPending && phase === 'waiting' && showingPartnershipUI && (() => {
         // If any individual scores exist we're at the start of a new rubber
         // (career totals persist across rubbers). Otherwise it's a fresh game.
         const isNewRubber = gameState.individualScores

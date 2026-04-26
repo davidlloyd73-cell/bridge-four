@@ -375,6 +375,12 @@ io.on('connection', (socket) => {
       }
     }
 
+    // Bots don't need partnership selection — clear the flag so the lobby
+    // shows "Deal First Hand" directly.
+    if (botsAdded > 0) {
+      currentGame.partnershipsPending = false;
+    }
+
     callback?.({ success: true, botsAdded });
     broadcastGameState(currentGame);
   });
