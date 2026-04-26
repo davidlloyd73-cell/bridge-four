@@ -161,7 +161,7 @@ export default function GameTable({
             </button>
           )}
           <button
-            className="score-btn"
+            className="score-btn video-toggle-btn"
             onClick={() => setVideoEnabled(v => !v)}
             title="Toggle video feeds"
           >

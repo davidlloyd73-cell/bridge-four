@@ -1763,8 +1763,52 @@ body {
   .review-hand { min-width: unset; }
   .review-bidding-section { min-width: unset; }
 
-  .top-bar { padding: 0.4rem 0.8rem; }
-  .game-info { gap: 0.6rem; font-size: 0.85rem; flex-wrap: wrap; }
+  /* ---- Compact top bar ---- */
+  .top-bar {
+    padding: 0.3rem 0.6rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+  .game-info { gap: 0.5rem; font-size: 0.8rem; flex-wrap: wrap; }
+  .top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    justify-content: flex-end;
+  }
+  /* Hide the Video toggle on mobile — not useful on phones */
+  .video-toggle-btn { display: none; }
+  .score-btn { padding: 0.25rem 0.6rem; font-size: 0.75rem; border-radius: 4px; }
+  .leave-btn, .restart-btn { padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; }
+  .last-trick-btn { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+
+  /* ---- Seat-N mobile: bidding panel from top (fan is at top, not bottom) ---- */
+  .seat-N.phase-bidding .center-area {
+    top: 200px;
+    bottom: auto;
+    max-height: calc(100dvh - 200px - 80px);
+    background: rgba(10,30,10,0.97);
+    border-radius: 14px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+  }
+
+  /* ---- Seat-E/W mobile: bidding panel also from top (no fan at bottom) ---- */
+  .seat-E.phase-bidding .center-area,
+  .seat-W.phase-bidding .center-area {
+    top: 120px;
+    bottom: auto;
+    max-height: calc(100dvh - 120px - 80px);
+    background: rgba(10,30,10,0.97);
+    border-radius: 14px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+  }
+
+  /* ---- Compact player-info on mobile ---- */
+  .player-info { padding: 0.3rem 0.5rem; min-width: 75px; gap: 0.1rem; }
+  .player-name { font-size: 0.85rem; }
+  .hcp-badge { font-size: 0.7rem; padding: 0.1rem 0.3rem; }
+  .card-count { font-size: 0.65rem; }
 
   /* Account for mobile browser chrome and nav bar */
   body { overflow: hidden; height: 100vh; height: 100dvh; }
