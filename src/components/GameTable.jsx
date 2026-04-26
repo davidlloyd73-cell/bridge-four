@@ -489,7 +489,7 @@ export default function GameTable({
               {['N','E','S','W'].map(seat => {
                 const entry = savedLastTrick.current.cards?.find(c => c.seat === seat);
                 const isWinner = savedLastTrick.current.winner === seat;
-                const pos = getPosition(seat, mySeat);
+                const pos = getPosition(seat);
                 return (
                   <div key={seat} className={`last-trick-pos last-trick-${pos} ${isWinner ? 'trick-winner' : ''}`}>
                     <div className="last-trick-seat-name">{gameState?.players?.[seat]?.name || seat}</div>
@@ -498,9 +498,6 @@ export default function GameTable({
                         <div className="card-corner top-left">
                           <span className="card-rank">{entry.card.rank}</span>
                           <span className="card-suit">{SUIT_SYMBOLS[entry.card.suit]}</span>
-                        </div>
-                        <div className="card-center">
-                          <span className="card-suit-large">{SUIT_SYMBOLS[entry.card.suit]}</span>
                         </div>
                       </div>
                     ) : (

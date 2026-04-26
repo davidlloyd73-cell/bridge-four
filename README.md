@@ -99,6 +99,7 @@ src/
 
 ## Recent changes
 
+- **2026-04-26** — Last Trick modal: removed large central suit symbol from cards for cleaner display
 - **2026-04-25** — Seat-aware layout: fan only at bottom seat; North/East/West own-hand shows as compact row; seat-specific CSS stops bidding panel overlapping own hand; South info-box no longer floats mid-table for non-South players
 - **2026-04-25** — Absolute compass layout: North always top, East right, South bottom, West left for all players; dummy column Ace-at-top with correct z-order; play-status moved above hand; trick-info moved to top-bar; card suit symbols enlarged
 - **2026-04-25** — Design improvements: bidding panel layout fixed (South's info no longer overlaps buttons), suit symbols enlarged and correctly coloured, trick-count box repositioned, video tiles enlarged
