@@ -16,13 +16,17 @@
   --vulnerable: #c0392b;
   --active: #f1c40f;
 
-  /* Card dimensions - overridden per breakpoint */
-  --card-w: 130px;
-  --card-h: 182px;
-  --card-w-small: 85px;
-  --card-h-small: 119px;
-  --dummy-card-w: 105px;
-  --dummy-card-h: 147px;
+  /* Card dimensions — viewport-clamped so layouts always fit, with the
+     desktop ceiling preserved. min() picks whichever value is smaller, so
+     on narrow screens cards shrink with the viewport; on wide screens
+     they hold at the desktop max. The original media-query overrides
+     below act as fine-tuning for the in-between sizes. */
+  --card-h: min(182px, calc(13vw + 10px));
+  --card-w: calc(var(--card-h) * 0.715);
+  --card-h-small: min(119px, calc((6vw + 22px) * 1.4));
+  --card-w-small: min(85px, calc(6vw + 22px));
+  --dummy-card-h: min(147px, calc((8vw + 18px) * 1.4));
+  --dummy-card-w: min(105px, calc(8vw + 18px));
 
   /* Fan arc parameters.
      - spread = total angular sweep of the whole hand
@@ -777,11 +781,22 @@ body {
   transition: transform 0.25s ease;
 }
 
-/* ---------- Top hand (straight horizontal overlap, non-fanned only) ---------- */
-.hand-top:not(.hand-fan) .hand-cards .card {
-  margin-left: -35px;
+/* ---------- Top hand (straight horizontal overlap, non-fanned only) ----------
+   Card width and overlap are viewport-clamped so 13 cards always fit:
+     slot ≈ min(35px, 6vw); card-w ≈ slot + 22px corner.
+   Total row width = card-w + 12 × slot = 13 × slot + 22 ≈ 78vw + 22px,
+   which fits any viewport ≥ ~300px. Caps at 85px card on desktop. */
+.hand-top:not(.hand-fan) .hand-cards .card,
+.hand-top:not(.hand-fan) .hand-cards .card.small {
+  width: min(85px, calc(6vw + 22px));
+  height: min(119px, calc((6vw + 22px) * 1.4));
+  margin-left: max(-50px, -6vw);
+  flex-shrink: 0;
 }
-.hand-top:not(.hand-fan) .hand-cards .card:first-child { margin-left: 0; }
+.hand-top:not(.hand-fan) .hand-cards .card:first-child,
+.hand-top:not(.hand-fan) .hand-cards .card.small:first-child {
+  margin-left: 0;
+}
 
 /* ---------- Side hands (vertical stack, non-fanned only) ---------- */
 .hand-left:not(.hand-fan) .hand-cards,

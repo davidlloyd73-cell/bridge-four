@@ -99,6 +99,7 @@ src/
 
 ## Recent changes
 
+- **2026-05-16** — Mobile fit (v2): card sizes now use viewport units in `:root` (`min(85px, calc(6vw + 22px))` etc.) so they shrink with the viewport even if media queries don't match (Chrome "Desktop site" mode, unusual DPR setups); `.hand-top` cards use `width: min(85px, 6vw+22px)` and `margin-left: max(-50px, -6vw)` so the 13-card row mathematically cannot overflow
 - **2026-05-16** — Mobile fit: cards now scale with viewport width (clamped via `min()`), fan-spread tightened to 60°/64°, bidding-box buttons reduced to 38×26 (was effectively 44×44 due to a touch-target override that was forcing them back up); panel sits higher with more available height
 - **2026-05-16** — Fix Render build: removed stray 0x08 (backspace) byte in the portfolio back-button regex in `index.html` that crashed Vite's HTML parser
 - **2026-05-16** — Fix Render build failure: `buildCommand` now uses `npm install --include=dev` so Vite (in devDependencies) is installed even with `NODE_ENV=production`
@@ -107,4 +108,3 @@ src/
 - **2026-04-26** — Last Trick modal: removed large central suit symbol from cards for cleaner display
 - **2026-04-25** — Seat-aware layout: fan only at bottom seat; North/East/West own-hand shows as compact row; seat-specific CSS stops bidding panel overlapping own hand; South info-box no longer floats mid-table for non-South players
 - **2026-04-25** — Absolute compass layout: North always top, East right, South bottom, West left for all players; dummy column Ace-at-top with correct z-order; play-status moved above hand; trick-info moved to top-bar; card suit symbols enlarged
-- **2026-04-25** — Design improvements: bidding panel layout fixed (South's info no longer overlaps buttons), suit symbols enlarged and correctly coloured, trick-count box repositioned, video tiles enlarged
