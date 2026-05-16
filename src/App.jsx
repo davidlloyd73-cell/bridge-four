@@ -219,6 +219,29 @@ export default function App() {
         onRestartGame={restartGame}
         error={error}
       />
+      <DebugPill />
     </ErrorBoundary>
+  );
+}
+
+function DebugPill() {
+  const [info, setInfo] = useState('');
+  useEffect(() => {
+    const measure = () => {
+      const card = document.querySelector('.hand-top .card') || document.querySelector('.card');
+      const cw = card ? Math.round(parseFloat(getComputedStyle(card).width)) : '?';
+      setInfo(`${innerWidth}×${innerHeight} dpr${devicePixelRatio} card=${cw}px`);
+    };
+    measure();
+    const t = setInterval(measure, 1000);
+    window.addEventListener('resize', measure);
+    return () => { clearInterval(t); window.removeEventListener('resize', measure); };
+  }, []);
+  return (
+    <div style={{
+      position: 'fixed', bottom: 4, right: 4, zIndex: 100000,
+      background: 'rgba(0,0,0,0.85)', color: '#0f0', font: '600 11px monospace',
+      padding: '4px 8px', borderRadius: 4, pointerEvents: 'none',
+    }}>{info}</div>
   );
 }
