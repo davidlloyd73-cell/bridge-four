@@ -358,10 +358,13 @@ body {
   transform: translateX(-50%);
 }
 /* When the local player is NOT South, there is no fan at the bottom —
-   South's player-info sits near the bottom edge with a small gap only. */
-.seat-N .pos-bottom,
-.seat-E .pos-bottom,
-.seat-W .pos-bottom {
+   South's player-info sits near the bottom edge with a small gap only.
+   Exception: if the local player is the declarer playing both hands
+   (.plays-both) and South is their dummy/declarer hand, the south fan
+   IS displayed — so put the south player-info above it like normal. */
+.seat-N:not(.plays-both) .pos-bottom,
+.seat-E:not(.plays-both) .pos-bottom,
+.seat-W:not(.plays-both) .pos-bottom {
   bottom: 20px;
 }
 .pos-top {
@@ -1740,10 +1743,14 @@ body {
 
 @media (max-width: 480px) {
   :root {
-    /* Cap card height so the fan span (≈ 2.6 × card-h) fits any phone viewport */
-    --card-h: min(60px, calc((100vw - 24px) / 2.7));
+    /* The fan (South own hand) uses --card-h via .card. Top/side hands
+       use .card.small which is overridden directly in .hand-top rules
+       (with smaller viewport-clamped sizing), so bumping card-h here only
+       affects the fan. fan-span ≈ 2.4 × card-h; cap at 85px so fan stays
+       legible at ~53% of a 384px viewport. */
+    --card-h: min(85px, calc((100vw - 24px) / 2.6));
     --card-w: calc(var(--card-h) * 0.7);
-    --card-h-small: calc(var(--card-h) * 0.8);
+    --card-h-small: calc(var(--card-h) * 0.55);
     --card-w-small: calc(var(--card-h-small) * 0.7);
     --fan-spread: 60deg;
   }

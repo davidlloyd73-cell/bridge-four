@@ -196,7 +196,7 @@ export default function GameTable({
       </div>
 
       {/* Game table */}
-      <div className={`table phase-${phase} seat-${mySeat}`}>
+      <div className={`table phase-${phase} seat-${mySeat} ${humanPlaysBoth ? 'plays-both' : ''}`}>
         {/* Player positions — absolute compass: North top, South bottom, East right, West left */}
         {['N', 'E', 'S', 'W'].map((seat) => {
           const pos = getPosition(seat);
