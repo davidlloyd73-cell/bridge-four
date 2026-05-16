@@ -782,32 +782,28 @@ body {
 }
 
 /* ---------- Top hand (straight horizontal overlap, non-fanned only) ----------
-   Card width is viewport-clamped via min() (works on Android Chrome).
-   margin-left uses a plain `-6vw` literal — Android Chrome's CSS engine
-   silently drops `max(-50px, -6vw)` AND `calc(-1 * min(50px, 6vw))`
-   (confirmed via on-page debug pill: computed margin-left was 0 in both
-   cases). Plain negative-vw literals work. Desktop gets a fixed override. */
+   Every .card is wrapped in a .hand-card-slot with display:contents (so the
+   slot vanishes from layout but persists in the DOM). That means every
+   .card matches :first-child of its slot in the DOM — so `.card:first-child`
+   selectors fire for ALL cards, not just the first in the row.
+   Fix: use `.hand-card-slot + .hand-card-slot .card` (slots-after-the-first)
+   for the overlap; the first slot's card keeps its default margin-left:0. */
 .hand-top:not(.hand-fan) .hand-cards .card,
 .hand-top:not(.hand-fan) .hand-cards .card.small {
   width: min(85px, calc(6vw + 22px));
   height: min(119px, calc((6vw + 22px) * 1.4));
-  margin-left: -6vw;
   flex-shrink: 0;
 }
-.hand-top:not(.hand-fan) .hand-cards .card:first-child,
-.hand-top:not(.hand-fan) .hand-cards .card.small:first-child {
-  margin-left: 0;
+.hand-top:not(.hand-fan) .hand-cards .hand-card-slot + .hand-card-slot .card,
+.hand-top:not(.hand-fan) .hand-cards .hand-card-slot + .hand-card-slot .card.small {
+  margin-left: -6vw;
 }
 /* Desktop: cap overlap so the row doesn't collapse to a stack on 1400px+
    monitors where -6vw would be -84px (more than card-w). */
 @media (min-width: 833px) {
-  .hand-top:not(.hand-fan) .hand-cards .card,
-  .hand-top:not(.hand-fan) .hand-cards .card.small {
+  .hand-top:not(.hand-fan) .hand-cards .hand-card-slot + .hand-card-slot .card,
+  .hand-top:not(.hand-fan) .hand-cards .hand-card-slot + .hand-card-slot .card.small {
     margin-left: -50px;
-  }
-  .hand-top:not(.hand-fan) .hand-cards .card:first-child,
-  .hand-top:not(.hand-fan) .hand-cards .card.small:first-child {
-    margin-left: 0;
   }
 }
 
@@ -816,13 +812,16 @@ body {
 .hand-right:not(.hand-fan) .hand-cards {
   flex-direction: column;
 }
+/* Side hands: same display:contents / :first-child bug as the top hand.
+   Apply margin-top only to slots that follow another slot. */
 .hand-left:not(.hand-fan) .hand-cards .card,
 .hand-right:not(.hand-fan) .hand-cards .card {
   margin-left: 0;
+}
+.hand-left:not(.hand-fan) .hand-cards .hand-card-slot + .hand-card-slot .card,
+.hand-right:not(.hand-fan) .hand-cards .hand-card-slot + .hand-card-slot .card {
   margin-top: -65px;
 }
-.hand-left:not(.hand-fan) .hand-cards .card:first-child,
-.hand-right:not(.hand-fan) .hand-cards .card:first-child { margin-top: 0; }
 
 /* ---------- Fan variant: top (used for declarer hand when humanPlaysBoth) ----
    Cards fan downward from a pivot above. In this fan the overlap hides
