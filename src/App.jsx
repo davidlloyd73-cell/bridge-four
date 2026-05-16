@@ -228,9 +228,13 @@ function DebugPill() {
   const [info, setInfo] = useState('');
   useEffect(() => {
     const measure = () => {
-      const card = document.querySelector('.hand-top .card') || document.querySelector('.card');
-      const cw = card ? Math.round(parseFloat(getComputedStyle(card).width)) : '?';
-      setInfo(`${innerWidth}×${innerHeight} dpr${devicePixelRatio} card=${cw}px`);
+      const cards = document.querySelectorAll('.hand-top .card');
+      // Measure the SECOND card so first-child margin-left:0 doesn't skew us.
+      const card = cards[1] || cards[0] || document.querySelector('.card');
+      const cs = card ? getComputedStyle(card) : null;
+      const cw = cs ? Math.round(parseFloat(cs.width)) : '?';
+      const ml = cs ? Math.round(parseFloat(cs.marginLeft)) : '?';
+      setInfo(`${innerWidth}×${innerHeight} dpr${devicePixelRatio} card=${cw}px ml=${ml}px`);
     };
     measure();
     const t = setInterval(measure, 1000);

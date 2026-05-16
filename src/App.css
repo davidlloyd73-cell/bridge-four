@@ -783,14 +783,16 @@ body {
 
 /* ---------- Top hand (straight horizontal overlap, non-fanned only) ----------
    Card width and overlap are viewport-clamped so 13 cards always fit:
-     slot ≈ min(35px, 6vw); card-w ≈ slot + 22px corner.
+     slot ≈ min(50px, 6vw); card-w ≈ slot + 22px corner.
    Total row width = card-w + 12 × slot = 13 × slot + 22 ≈ 78vw + 22px,
-   which fits any viewport ≥ ~300px. Caps at 85px card on desktop. */
+   which fits any viewport ≥ ~300px. Caps at 85px card on desktop.
+   margin-left uses calc(-1 * min(...)) instead of max(neg, neg) because
+   max() with all-negative arguments was not applying on Android Chrome. */
 .hand-top:not(.hand-fan) .hand-cards .card,
 .hand-top:not(.hand-fan) .hand-cards .card.small {
   width: min(85px, calc(6vw + 22px));
   height: min(119px, calc((6vw + 22px) * 1.4));
-  margin-left: max(-50px, -6vw);
+  margin-left: calc(-1 * min(50px, 6vw));
   flex-shrink: 0;
 }
 .hand-top:not(.hand-fan) .hand-cards .card:first-child,
