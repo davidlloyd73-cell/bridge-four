@@ -60,7 +60,7 @@ The Vite dev server proxies `/socket.io` to `localhost:3001` automatically.
 Defined in `render.yaml`:
 
 ```yaml
-buildCommand: npm install && npm run build
+buildCommand: npm install --include=dev && npm run build
 startCommand: node server/index.js
 ```
 
@@ -99,6 +99,7 @@ src/
 
 ## Recent changes
 
+- **2026-05-16** — Fix Render build failure: `buildCommand` now uses `npm install --include=dev` so Vite (in devDependencies) is installed even with `NODE_ENV=production`
 - **2026-04-26** — Mobile layout improvements: compact top bar (2 rows, video button hidden), seat-aware bidding panel positioning for North/East/West phones, tighter player-info boxes
 - **2026-04-26** — Partnership flow: lobby shows first; "Choose Partnerships" button appears only when all 4 humans are seated; bots skip partnership screen and go straight to dealing
 - **2026-04-26** — Last Trick modal: removed large central suit symbol from cards for cleaner display
