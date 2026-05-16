@@ -99,6 +99,7 @@ src/
 
 ## Recent changes
 
+- **2026-05-16** — Mobile fit: cards now scale with viewport width (clamped via `min()`), fan-spread tightened to 60°/64°, bidding-box buttons reduced to 38×26 (was effectively 44×44 due to a touch-target override that was forcing them back up); panel sits higher with more available height
 - **2026-05-16** — Fix Render build: removed stray 0x08 (backspace) byte in the portfolio back-button regex in `index.html` that crashed Vite's HTML parser
 - **2026-05-16** — Fix Render build failure: `buildCommand` now uses `npm install --include=dev` so Vite (in devDependencies) is installed even with `NODE_ENV=production`
 - **2026-04-26** — Mobile layout improvements: compact top bar (2 rows, video button hidden), seat-aware bidding panel positioning for North/East/West phones, tighter player-info boxes

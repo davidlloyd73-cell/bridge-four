@@ -1631,12 +1631,13 @@ body {
   .phase-bidding .pos-left  { top: 68px; transform: none; }
   .phase-bidding .pos-right { top: 68px; transform: none; }
 
-  /* Slide the panel up, clearing South's player-info (~90px above the fan) */
+  /* Slide the panel up, clearing South's player-info (~60px above the fan
+     after the mobile compactions). */
   .phase-bidding .center-area {
     top: auto;
-    bottom: calc(var(--fan-height) + 110px);
+    bottom: calc(var(--fan-height) + 70px);
     transform: translateX(-50%);
-    max-height: calc(100dvh - var(--fan-height) - 290px);
+    max-height: calc(100dvh - var(--fan-height) - 220px);
     background: rgba(10,30,10,0.97);
     border-radius: 14px 14px 0 0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
@@ -1686,19 +1687,20 @@ body {
 
 @media (max-width: 768px) {
   :root {
-    --card-w: 70px;
-    --card-h: 100px;
-    --card-w-small: 55px;
-    --card-h-small: 78px;
-    --dummy-card-w: 62px;
-    --dummy-card-h: 87px;
+    --card-w: 62px;
+    --card-h: 88px;
+    --card-w-small: 50px;
+    --card-h-small: 70px;
+    --dummy-card-w: 56px;
+    --dummy-card-h: 78px;
+    --fan-spread: 60deg;
   }
-  .card-rank { font-size: 1.05rem; }
-  .card-suit { font-size: 0.88rem; }
-  .card-suit-large { font-size: 1.9rem; }
+  .card-rank { font-size: 0.95rem; }
+  .card-suit { font-size: 0.8rem; }
+  .card-suit-large { font-size: 1.7rem; }
 
-  .bid-btn { width: 54px; height: 38px; font-size: 0.85rem; }
-  .bid-suit-sym { font-size: 1.2rem; }
+  .bid-btn { width: 44px; height: 32px; font-size: 0.78rem; }
+  .bid-suit-sym { font-size: 1rem; }
   .center-area { width: 95vw; }
   /* pos-bottom uses the calc in the base rule — it scales with --fan-height */
 
@@ -1710,33 +1712,33 @@ body {
 
 @media (max-width: 480px) {
   :root {
-    --card-w: 52px;
-    --card-h: 74px;
-    --card-w-small: 42px;
-    --card-h-small: 60px;
-    /* A slightly wider fan for smaller cards keeps the visible arc */
-    --fan-spread: 70deg;
+    /* Cap card height so the fan span (≈ 2.6 × card-h) fits any phone viewport */
+    --card-h: min(60px, calc((100vw - 24px) / 2.7));
+    --card-w: calc(var(--card-h) * 0.7);
+    --card-h-small: calc(var(--card-h) * 0.8);
+    --card-w-small: calc(var(--card-h-small) * 0.7);
+    --fan-spread: 60deg;
   }
-  .card-rank { font-size: 0.88rem; }
-  .card-suit { font-size: 0.72rem; }
-  .card-suit-large { font-size: 1.45rem; }
+  .card-rank { font-size: 0.78rem; }
+  .card-suit { font-size: 0.65rem; }
+  .card-suit-large { font-size: 1.25rem; }
 
   .hand-bottom { bottom: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
 
   /* Compact bidding box */
-  .bidding-box { padding: 0.5rem; }
-  .bidding-box h3 { font-size: 0.9rem; margin-bottom: 0.4rem; }
-  .bid-grid { gap: 2px; margin-bottom: 0.5rem; }
+  .bidding-box { padding: 0.35rem; }
+  .bidding-box h3 { font-size: 0.78rem; margin-bottom: 0.3rem; }
+  .bid-grid { gap: 2px; margin-bottom: 0.35rem; }
   .bid-row { gap: 2px; }
-  .bid-btn { width: 44px; height: 28px; font-size: 0.75rem; }
-  .bid-level { font-size: 0.85rem; }
-  .bid-suit-sym { font-size: 0.9rem; }
-  .bid-action { padding: 0.35rem 0.8rem; font-size: 0.85rem; }
-  .bid-actions { gap: 0.4rem; }
-  .bidding-history { padding: 0.5rem; margin-bottom: 0.5rem; }
-  .bidding-history table { font-size: 0.85rem; }
-  .bidding-history th { padding: 0.25rem 0.4rem; font-size: 0.85rem; }
-  .bidding-history td { padding: 0.25rem 0.4rem; }
+  .bid-btn { width: 38px; height: 26px; font-size: 0.7rem; }
+  .bid-level { font-size: 0.75rem; }
+  .bid-suit-sym { font-size: 0.8rem; }
+  .bid-action { padding: 0.3rem 0.65rem; font-size: 0.78rem; }
+  .bid-actions { gap: 0.3rem; }
+  .bidding-history { padding: 0.3rem; margin-bottom: 0.3rem; }
+  .bidding-history table { font-size: 0.72rem; }
+  .bidding-history th { padding: 0.15rem 0.3rem; font-size: 0.72rem; }
+  .bidding-history td { padding: 0.15rem 0.3rem; }
 
   /* Compact player info */
   .player-info { padding: 0.35rem 0.6rem; min-width: 80px; }
@@ -1816,19 +1818,14 @@ body {
 }
 
 @media (max-width: 375px) {
-  /* Cards */
+  /* Cards — the 480px breakpoint already uses min(60px, viewport-derived),
+     so at 375px the card-h will already be ~ (375-24)/2.7 = 130 → capped to 60.
+     We only need to tighten the spread further here. */
   :root {
-    --card-w: 48px;
-    --card-h: 68px;
-    --card-w-small: 38px;
-    --card-h-small: 54px;
-    --fan-spread: 74deg;
+    --fan-spread: 64deg;
   }
   .card { border-radius: 6px; }
   .card.small { border-radius: 5px; }
-  .card-rank { font-size: 0.7rem; }
-  .card-suit { font-size: 0.55rem; }
-  .card-suit-large { font-size: 1rem; }
   .card.small .card-rank { font-size: 0.65rem; }
   .card.small .card-suit { font-size: 0.5rem; }
   .card.small .card-suit-large { font-size: 0.9rem; }
@@ -1863,16 +1860,16 @@ body {
   }
 
   /* Center area */
-  .center-area { width: 95vw; }
+  .center-area { width: 96vw; }
 
-  /* Bidding box */
-  .bidding-box { padding: 0.6rem; }
-  .bid-btn { width: 40px; height: 30px; font-size: 0.75rem; }
-  .bid-level { font-size: 0.8rem; }
-  .bid-suit-sym { font-size: 0.85rem; }
-  .bid-action { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
-  .bidding-history th { font-size: 0.85rem; padding: 0.3rem; }
-  .bidding-history td { padding: 0.3rem; font-size: 0.85rem; }
+  /* Bidding box — tighter than the 480 rule */
+  .bidding-box { padding: 0.3rem; }
+  .bid-btn { width: 36px; height: 24px; font-size: 0.68rem; }
+  .bid-level { font-size: 0.7rem; }
+  .bid-suit-sym { font-size: 0.75rem; }
+  .bid-action { padding: 0.25rem 0.55rem; font-size: 0.72rem; }
+  .bidding-history th { font-size: 0.68rem; padding: 0.15rem 0.25rem; }
+  .bidding-history td { padding: 0.15rem 0.25rem; font-size: 0.68rem; }
 
   /* Trick positions */
   .trick-pos-bottom { bottom: 14%; }
@@ -1938,10 +1935,12 @@ body {
     transition: transform 0.15s ease;
   }
 
-  /* Bid buttons — generous tap area on phones */
+  /* Bid buttons — dense 7×5 grid, so allow smaller targets than the 44px
+     floor. Buttons sit edge-to-edge so accidental taps mostly hit a valid
+     adjacent bid, which is recoverable. */
   .bid-btn {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 36px;
+    min-height: 30px;
   }
 
   /* Review action buttons — full width on small screens */
